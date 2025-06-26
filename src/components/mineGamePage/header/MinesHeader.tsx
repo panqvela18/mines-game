@@ -1,15 +1,26 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { DropDownGames } from "./DropDownGames";
 import "@/styles/minesGamePage/minesHeader.css";
+import { HowToPlayModal } from "./HowToPlayModal";
+import { DropDownGames } from "./DropDownGames";
+import { useGameStore } from "@/store/useGameStore";
 
 export const MinesHeader = () => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const { user } = useGameStore();
 
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
+    setShowHowToPlay(false);
   };
+
+  const toggleHowToPlay = () => {
+    setShowHowToPlay((prev) => !prev);
+    setShowDropdown(false);
+  };
+
   return (
     <div className="minesGame-header">
       <div className="minesGame-header-left">
@@ -17,15 +28,16 @@ export const MinesHeader = () => {
           MINES
           <Image
             className="minesGame-header-btn-icon"
-            src={
-              "https://turbo.spribegaming.com/icon-dd-arrow.e394e8c554623388.svg"
-            }
+            src="https://turbo.spribegaming.com/icon-dd-arrow.e394e8c554623388.svg"
             alt="arrow"
             width={12}
             height={12}
           />
         </button>
-        <button className="how-to-play-btn">
+
+        {showHowToPlay && <HowToPlayModal toggleHowToPlay={toggleHowToPlay} />}
+
+        <button className="how-to-play-btn" onClick={toggleHowToPlay}>
           <span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -44,25 +56,25 @@ export const MinesHeader = () => {
           </span>
           How to play?
         </button>
+
         <div className="fun-mode">FUN MODE</div>
-        <div></div>
       </div>
+
       <div className="minesGame-header-right">
         <div className="minesGame-balance">
-          <p>3000.00</p>
+          <p>{user.getBalance().toFixed(2)}</p>
           <span>USD</span>
         </div>
         <button className="minesGame-burger-menu-btn">
           <Image
-            src={
-              "https://turbo.spribegaming.com/icon-burger-menu.d11de584b7113bad.svg"
-            }
+            src="https://turbo.spribegaming.com/icon-burger-menu.d11de584b7113bad.svg"
             alt="burger"
             width={10}
             height={10}
           />
         </button>
       </div>
+
       {showDropdown && <DropDownGames />}
     </div>
   );

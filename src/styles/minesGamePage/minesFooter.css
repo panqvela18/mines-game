@@ -4,7 +4,6 @@
   justify-content: space-between;
   background-color: #084494;
   padding: 10px 15%;
-  /* border: 1px solid rgba(0, 0, 0, 0.5); */
   border-radius: 20px;
   gap: 10px;
 }
@@ -152,4 +151,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }

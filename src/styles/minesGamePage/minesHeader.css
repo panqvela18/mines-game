@@ -1,0 +1,107 @@
+.minesGame-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 20px;
+  justify-content: space-between;
+  background-color: #084494;
+}
+
+.minesGame-header-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.minesGame-header-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  background-color: #0267a5;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  transition: opacity 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  position: relative;
+  padding: 5px 50px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.minesGame-header-btn:hover {
+  background-color: #055f96;
+  opacity: 0.8;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+.minesGame-header-btn-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.how-to-play-btn {
+  display: flex;
+  align-items: center;
+  background-color: #f89414;
+  color: black;
+  border: none;
+  padding: 5px 50px;
+  border-radius: 20px;
+  position: relative;
+  margin-left: 15px;
+  cursor: pointer;
+}
+
+.question-icon {
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.fun-mode {
+  position: absolute;
+  top: 0;
+  right: 50%;
+  transform: translateX(50%);
+  padding: 5px 30px;
+  background-color: #f89414;
+  border-radius: 0 0 10px 10px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.minesGame-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.minesGame-balance {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 500;
+  margin-right: 15px;
+}
+
+.minesGame-balance span {
+  margin-left: 5px;
+  opacity: 0.7;
+}
+.minesGame-burger-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  background-color: #0267a5;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}

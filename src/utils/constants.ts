@@ -11,3 +11,22 @@ export const games:Games[]=[
     {id:8,name:"Hot Line",iconUrl:"https://turbo.spribegaming.com/assets/icons/icon-hotline.svg"},
     {id:9,name:"Balloon",iconUrl:"https://turbo.spribegaming.com/assets/icons/icon-balloon.svg"}
 ]
+
+
+export const betAmounts:number[] = [
+    0.10, 
+    0.20, 
+    0.30, 
+    0.40,
+    0.50,
+    0.60,
+    0.70,
+    0.80, 
+    1.20, 
+    2.00, 
+    4.00, 
+    10.00,
+    20.00,
+    50.00,
+    100.00,
+]

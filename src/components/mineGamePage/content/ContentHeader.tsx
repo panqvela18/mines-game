@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { MinesAmountsDropDown } from "./MinesAmountsDropDown";
 import { useGameStore } from "@/store/useGameStore";
@@ -9,13 +9,33 @@ export const ContentHeader = () => {
 
   const safeCellsCount = 25 - minesCount;
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const toggleMinesDropDown = () => {
     setShowMinesDropDown((prev) => !prev);
   };
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        showMinesDropDown &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowMinesDropDown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showMinesDropDown]);
+
   return (
     <>
-      <div className="select-mines-cont">
+      <div className="select-mines-cont" ref={dropdownRef}>
         <button
           className="select-mines-amounts-btn"
           onClick={toggleMinesDropDown}

@@ -1,33 +1,17 @@
 import { create } from "zustand";
 import { Game } from "@/classes/Game";
 import { User } from "@/classes/User";
+import {
+  getInitialMultiplier,
+  getMultiplierIncrease,
+} from "@/utils/generateMultiplier";
 
-type GameStore = {
-  game: Game;
-  user: User;
-  minesCount: number;
-  betValue: number;
-  gameStarted: boolean;
-  explodedCellIndex: number | null;
-  showAllMines: boolean;
-correctGuesses: number;
-setCorrectGuesses: (count: number) => void;
-incrementCorrectGuesses: () => void;
-  setMineCount: (count: number) => void;
-  setBetValue: (value: number) => void;
-  startGame: () => void;
-  reveal: (index: number) => void;
-  resetGame: () => void;
-  multiplier: number;
-  increaseMultiplier: () => void;
-  resetMultiplier: () => void;
-  cashout: () => void;
-};
-
-
-const coinSound = typeof Audio !== "undefined" ? new Audio("/mp3/coin-recieved-230517.mp3") : null;
-const explosionSound = typeof Audio !== "undefined" ? new Audio("/mp3/blast-37988.mp3") : null;
-
+const coinSound =
+  typeof Audio !== "undefined"
+    ? new Audio("/mp3/coin-recieved-230517.mp3")
+    : null;
+const explosionSound =
+  typeof Audio !== "undefined" ? new Audio("/mp3/blast-37988.mp3") : null;
 
 export const useGameStore = create<GameStore>((set, get) => ({
   game: new Game(25, 3),
@@ -37,42 +21,60 @@ export const useGameStore = create<GameStore>((set, get) => ({
   gameStarted: false,
   explodedCellIndex: null,
   showAllMines: false,
-
-correctGuesses: 0,
-setCorrectGuesses: (count) => set({ correctGuesses: count }),
-incrementCorrectGuesses: () => set((state) => ({ correctGuesses: state.correctGuesses + 1 })),
-
-multiplier: 1.1,
-increaseMultiplier: () => set(state => ({ multiplier: state.multiplier * 1.10 })), // increase by 10%
-resetMultiplier: () => set({ multiplier: 1.1 }),
-
-
-cashout: () => {
-  const { user, multiplier, betValue } = get();
-  const cashoutAmount = betValue * multiplier;
-  user.addBalance(cashoutAmount);  
-
-  set({
-    gameStarted: false,
-    multiplier: 1.1,
-    explodedCellIndex: null,
-    showAllMines: true,    
-    correctGuesses: 0,    
-  });
-
-  setTimeout(() => {
+  correctGuesses: 0,
+  setCorrectGuesses: (count) => set({ correctGuesses: count }),
+  incrementCorrectGuesses: () =>
+    set((state) => ({ correctGuesses: state.correctGuesses + 1 })),
+  multiplier: getInitialMultiplier(3),
+  increaseMultiplier: () => {
+    const { multiplier, minesCount } = get();
+    const increaseRate = getMultiplierIncrease(minesCount);
+    const newMultiplier = multiplier * (1 + increaseRate);
+    set({ multiplier: newMultiplier });
+  },
+  lastCashoutAmount: 0,
+  showCashoutPopup: false,
+  resetMultiplier: () => {
     const { minesCount } = get();
-    set({
-      game: new Game(25, minesCount),
-      gameStarted: false,
-      explodedCellIndex: null,
-      showAllMines: false,
-      multiplier: 1.1,
-    });
-  }, 2000);
-},
+    const initialMultiplier = getInitialMultiplier(minesCount);
+    set({ multiplier: initialMultiplier });
+  },
 
-  setMineCount: (count) => set({ minesCount: count }),
+  cashout: () => {
+    const { user, multiplier, betValue, minesCount } = get();
+    const cashoutAmount = betValue * multiplier;
+    user.addBalance(cashoutAmount);
+
+    const initialMultiplier = getInitialMultiplier(minesCount);
+
+    set({
+      gameStarted: false,
+      multiplier: initialMultiplier,
+      explodedCellIndex: null,
+      showAllMines: true,
+      correctGuesses: 0,
+      lastCashoutAmount: cashoutAmount,
+      showCashoutPopup: true,
+    });
+
+    setTimeout(() => {
+      const { minesCount } = get();
+
+      set({
+        game: new Game(25, minesCount),
+        gameStarted: false,
+        explodedCellIndex: null,
+        showAllMines: false,
+        multiplier: initialMultiplier,
+        showCashoutPopup: false,
+      });
+    }, 2000);
+  },
+
+  setMineCount: (count) => {
+    const initialMultiplier = getInitialMultiplier(count);
+    set({ minesCount: count, multiplier: initialMultiplier });
+  },
   setBetValue: (value) => set({ betValue: value }),
 
   startGame: () => {
@@ -87,83 +89,73 @@ cashout: () => {
 
     const newUser = new User(user.getBalance());
 
+    const initialMultiplier = getInitialMultiplier(minesCount);
+
     set({
       game: newGame,
       gameStarted: true,
       explodedCellIndex: null,
       showAllMines: false,
       user: newUser,
+      multiplier: initialMultiplier,
     });
   },
 
-reveal: (index) => {
-  const {
-    game,
-    user,
-    gameStarted,
-    minesCount,
-    increaseMultiplier,
-    incrementCorrectGuesses,
-  } = get();
+  reveal: (index) => {
+    const {
+      game,
+      user,
+      gameStarted,
+      minesCount,
+      increaseMultiplier,
+      incrementCorrectGuesses,
+    } = get();
 
-  if (!gameStarted) return;
+    if (!gameStarted) return;
 
-  const result = game.revealCell(index);
+    const result = game.revealCell(index);
 
-  if (result === "mine") {
-    user.lose();
+    if (result === "mine") {
+      user.lose();
 
-    if (explosionSound) {
-      explosionSound.currentTime = 0;
-      explosionSound.play().catch((err) =>
-        console.warn("Explosion sound failed:", err)
-      );
+      if (explosionSound) {
+        explosionSound.currentTime = 0;
+        explosionSound
+          .play()
+          .catch((err) => console.warn("Explosion sound failed:", err));
+      }
+
+      const initialMultiplier = getInitialMultiplier(minesCount);
+
+      set({
+        gameStarted: false,
+        explodedCellIndex: index,
+        showAllMines: true,
+        multiplier: initialMultiplier,
+        correctGuesses: 0,
+      });
+
+      setTimeout(() => {
+        set({
+          game: new Game(25, minesCount),
+          gameStarted: false,
+          explodedCellIndex: null,
+          showAllMines: false,
+          multiplier: initialMultiplier,
+        });
+      }, 2000);
+
+      return;
     }
 
-    set({
-      gameStarted: false,
-      explodedCellIndex: index,
-      showAllMines: true,
-      multiplier: 1,
-      correctGuesses: 0,
-    });
+    incrementCorrectGuesses();
+    increaseMultiplier();
 
-    setTimeout(() => {
-      set({
-        game: new Game(25, minesCount),
-        gameStarted: false,
-        explodedCellIndex: null,
-        showAllMines: false,
-        multiplier: 1,
-      });
-    }, 2000);
+    if (coinSound) {
+      coinSound.currentTime = 0;
+      coinSound.play().catch((err) => console.warn("Coin sound failed:", err));
+    }
 
-    return;
-  }
-
-  // ✅ Correct guess
-  incrementCorrectGuesses();
-  increaseMultiplier();
-
-  if (coinSound) {
-    coinSound.currentTime = 0;
-    coinSound.play().catch((err) =>
-      console.warn("Coin sound failed:", err)
-    );
-  }
-
-  set({ game, user });
-},
-
-
-
-  resetGame: () => {
-    const { minesCount } = get();
-    set({
-      game: new Game(25, minesCount),
-      gameStarted: false,
-      explodedCellIndex: null,
-      showAllMines: false,
-    });
+    set({ game, user });
   },
 }));

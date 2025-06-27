@@ -2,20 +2,21 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 10px;
-  min-width: 320px;
+  width: 100%;
+  max-width: 600px;
   margin: 20px auto;
 }
 
 .mine-cell {
   background: #0d2b52;
-  width: 100px;
-  height: 80px;
+  aspect-ratio: 5 / 4;
   border-radius: 10px;
   box-shadow: 0 3px 0 #07203b;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.2s;
+  width: 100%;
 }
 
 .mine-cell:hover {

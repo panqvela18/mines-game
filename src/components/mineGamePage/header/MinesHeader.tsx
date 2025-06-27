@@ -9,7 +9,7 @@ import { useGameStore } from "@/store/useGameStore";
 export const MinesHeader = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
-  const { user, betValue, multiplier, lastCashoutAmount, showCashoutPopup } =
+  const { user, lastCashoutAmount, showCashoutPopup } =
     useGameStore();
 
   const toggleDropdown = () => {

@@ -18,13 +18,13 @@ export const Modal = ({
             className="modal-confirm-btn"
             onClick={() => handleAgeRespones(true)}
           >
-            Yes i'm over 18
+            Yes I&apos;m over 18
           </button>
           <button
             className="modal-cancel-btn"
             onClick={() => handleAgeRespones(false)}
           >
-            No, i'm under 18
+            No, I&apos;m under 18
           </button>
         </div>
       </div>

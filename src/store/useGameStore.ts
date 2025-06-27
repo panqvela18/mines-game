@@ -22,13 +22,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
   explodedCellIndex: null,
   showAllMines: false,
   correctGuesses: 0,
+  boxesToReveal: 3,
+
+  setBoxesToReveal: (count) =>
+    set({ boxesToReveal: Math.max(1, Math.min(24, count)) }),
+
   showInsufficientBalanceMessage: false,
-setShowInsufficientBalanceMessage: (value: boolean) =>
-  set({ showInsufficientBalanceMessage: value }),
+  setShowInsufficientBalanceMessage: (value: boolean) =>
+    set({ showInsufficientBalanceMessage: value }),
 
   setCorrectGuesses: (count) => set({ correctGuesses: count }),
   incrementCorrectGuesses: () =>
     set((state) => ({ correctGuesses: state.correctGuesses + 1 })),
+
   multiplier: getInitialMultiplier(3),
   increaseMultiplier: () => {
     const { multiplier, minesCount } = get();
@@ -36,12 +42,95 @@ setShowInsufficientBalanceMessage: (value: boolean) =>
     const newMultiplier = multiplier * (1 + increaseRate);
     set({ multiplier: newMultiplier });
   },
-  lastCashoutAmount: 0,
-  showCashoutPopup: false,
+
   resetMultiplier: () => {
     const { minesCount } = get();
     const initialMultiplier = getInitialMultiplier(minesCount);
     set({ multiplier: initialMultiplier });
+  },
+
+  lastCashoutAmount: 0,
+  showCashoutPopup: false,
+
+  randomSelectedBoxes: [],
+  setRandomSelectedBoxes: (boxes) => set({ randomSelectedBoxes: boxes }),
+
+  autoPlayRounds: 0,
+  setAutoPlayRounds: (rounds) => set({ autoPlayRounds: rounds }),
+
+  currentAutoRound: 0,
+  isAutoPlaying: false,
+
+  isAutoPlayEnabled: false,
+  setIsAutoPlayEnabled: (value: boolean) =>
+    set({ isAutoPlayEnabled: value }),
+
+  startAutoPlay: async () => {
+    const {
+      autoPlayRounds,
+      boxesToReveal,
+      randomSelectedBoxes,
+      setRandomSelectedBoxes,
+      isAutoPlaying,
+      betValue,
+      user,
+    } = get();
+
+    if (isAutoPlaying || autoPlayRounds <= 0) return;
+
+    set({ isAutoPlaying: true, currentAutoRound: 0 });
+
+    for (let round = 1; round <= autoPlayRounds; round++) {
+      if (user.getBalance() < betValue) break;
+
+      get().startGame();
+      await new Promise((r) => setTimeout(r, 300));
+
+      let selected = [...randomSelectedBoxes];
+
+      if (selected.length < boxesToReveal) {
+        const allIndexes = Array.from({ length: 25 }, (_, i) => i);
+        const used = new Set(selected);
+
+        while (selected.length < boxesToReveal && selected.length < 24) {
+          const randIndex = Math.floor(Math.random() * allIndexes.length);
+          const candidate = allIndexes[randIndex];
+          if (!used.has(candidate)) {
+            selected.push(candidate);
+            used.add(candidate);
+          }
+        }
+      }
+
+      selected = selected.slice(0, boxesToReveal);
+      setRandomSelectedBoxes(selected);
+
+      let exploded = false;
+
+      for (const box of selected) {
+        const { gameStarted } = get();
+        if (!gameStarted) {
+          exploded = true;
+          break;
+        }
+        get().reveal(box);
+        await new Promise((r) => setTimeout(r, 400));
+      }
+
+      if (!exploded) {
+        get().cashout();
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+
+      set({ currentAutoRound: round });
+    }
+
+    set({ isAutoPlaying: false,  randomSelectedBoxes: [],
+ });
+  },
+
+  stopAutoPlay: () => {
+    set({ isAutoPlaying: false, autoPlayRounds: 0, currentAutoRound: 0 });
   },
 
   cashout: () => {
@@ -79,34 +168,36 @@ setShowInsufficientBalanceMessage: (value: boolean) =>
     const initialMultiplier = getInitialMultiplier(count);
     set({ minesCount: count, multiplier: initialMultiplier });
   },
+
   setBetValue: (value) => set({ betValue: value }),
 
   startGame: () => {
-  const { user, betValue, minesCount, setShowInsufficientBalanceMessage } = get();
+    const { user, betValue, minesCount, setShowInsufficientBalanceMessage } =
+      get();
 
-  if (!user.setBet(betValue)) {
-    setShowInsufficientBalanceMessage(true);
+    if (!user.setBet(betValue)) {
+      setShowInsufficientBalanceMessage(true);
 
-    setTimeout(() => {
-      setShowInsufficientBalanceMessage(false);
-    }, 2000);
+      setTimeout(() => {
+        setShowInsufficientBalanceMessage(false);
+      }, 2000);
 
-    return;
-  }
+      return;
+    }
 
-  const newGame = new Game(25, minesCount);
-  const newUser = new User(user.getBalance());
-  const initialMultiplier = getInitialMultiplier(minesCount);
+    const newGame = new Game(25, minesCount);
+    const newUser = new User(user.getBalance());
+    const initialMultiplier = getInitialMultiplier(minesCount);
 
-  set({
-    game: newGame,
-    gameStarted: true,
-    explodedCellIndex: null,
-    showAllMines: false,
-    user: newUser,
-    multiplier: initialMultiplier,
-  });
-},
+    set({
+      game: newGame,
+      gameStarted: true,
+      explodedCellIndex: null,
+      showAllMines: false,
+      user: newUser,
+      multiplier: initialMultiplier,
+    });
+  },
 
   reveal: (index) => {
     const {

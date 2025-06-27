@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import "@/styles/minesGamePage/minesFooter.css";
 import Image from "next/image";
 import { betAmounts } from "@/utils/constants";
@@ -11,9 +11,12 @@ import {
 } from "@/utils/betHelpers";
 import { BetDropDown } from "./BetDropDown";
 import { useGameStore } from "@/store/useGameStore";
+import { AutoPlayModal } from "./AutoPlayModal";
 
 export const MinesFooter = () => {
   const [showBetDropdown, setShowBetDropdown] = useState(false);
+  const [showAutoPlayOptions, setShowAutoPlayOptions] = useState(false);
+
   const {
     betValue,
     setBetValue,
@@ -23,12 +26,16 @@ export const MinesFooter = () => {
     cashout,
     correctGuesses,
     showInsufficientBalanceMessage,
+    isAutoPlayEnabled,
   } = useGameStore();
 
   const moneySoundRef = useRef<HTMLAudioElement | null>(null);
 
   const toggleBetDropdown = () => {
     setShowBetDropdown((prev) => !prev);
+  };
+  const toggleAutoPlayOptions = () => {
+    setShowAutoPlayOptions((prev) => !prev);
   };
 
   const parsedBetValue = parseBetValue(betValue.toString());
@@ -140,7 +147,14 @@ export const MinesFooter = () => {
         className="footer-btn-container"
         style={{ display: "flex", width: "100%" }}
       >
-        <button className="autoplay-btn">
+        <button
+          disabled={!isAutoPlayEnabled || gameStarted}
+          onClick={toggleAutoPlayOptions}
+          style={
+            !isAutoPlayEnabled || gameStarted ? { opacity: "0.5" } : undefined
+          }
+          className="autoplay-btn"
+        >
           <Image
             src="https://turbo.spribegaming.com/icon-auto-play.4977be4170e6076b.svg"
             alt="random-icon"
@@ -148,6 +162,10 @@ export const MinesFooter = () => {
             height={18}
           />
         </button>
+
+        {showAutoPlayOptions && (
+          <AutoPlayModal toggleAutoPlayOptions={toggleAutoPlayOptions} />
+        )}
 
         <button
           className={`${gameStarted ? "cashout-btn" : " bet-btn"}`}

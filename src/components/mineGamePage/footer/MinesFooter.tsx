@@ -129,50 +129,49 @@ export const MinesFooter = () => {
           />
         )}
       </div>
-      <div>
-        <button className="autoplay-btn">
+
+      <button className="autoplay-btn">
+        <Image
+          src="https://turbo.spribegaming.com/icon-auto-play.4977be4170e6076b.svg"
+          alt="random-icon"
+          width={18}
+          height={18}
+        />
+      </button>
+
+      <button
+        className={`${gameStarted ? "cashout-btn" : " bet-btn"}`}
+        onClick={
+          gameStarted && correctGuesses > 0
+            ? handleCashoutClick
+            : handleStartClick
+        }
+        disabled={gameStarted && correctGuesses === 0}
+        style={{ opacity: gameStarted && correctGuesses === 0 ? 0.5 : 1 }}
+      >
+        {!gameStarted && (
           <Image
-            src="https://turbo.spribegaming.com/icon-auto-play.4977be4170e6076b.svg"
-            alt="random-icon"
-            width={18}
-            height={18}
+            src="https://turbo.spribegaming.com/icon-play.284324538612d258.svg"
+            alt="bet-icon"
+            width={20}
+            height={20}
           />
-        </button>
+        )}
 
-        <button
-          className={`${gameStarted ? "cashout-btn" : " bet-btn"}`}
-          onClick={
-            gameStarted && correctGuesses > 0
-              ? handleCashoutClick
-              : handleStartClick
-          }
-          disabled={gameStarted && correctGuesses === 0}
-          style={{ opacity: gameStarted && correctGuesses === 0 ? 0.5 : 1 }}
-        >
-          {!gameStarted && (
-            <Image
-              src="https://turbo.spribegaming.com/icon-play.284324538612d258.svg"
-              alt="bet-icon"
-              width={20}
-              height={20}
-            />
-          )}
-
-          <span>
-            {gameStarted ? (
-              correctGuesses === 0 ? (
-                "CASHOUT"
-              ) : (
-                <p className="cashout-p">
-                  CASHOUT <span>{(betValue * multiplier).toFixed(2)} USD</span>
-                </p>
-              )
+        <span>
+          {gameStarted ? (
+            correctGuesses === 0 ? (
+              "CASHOUT"
             ) : (
-              "BET"
-            )}
-          </span>
-        </button>
-      </div>
+              <p className="cashout-p">
+                CASHOUT <span>{(betValue * multiplier).toFixed(2)} USD</span>
+              </p>
+            )
+          ) : (
+            "BET"
+          )}
+        </span>
+      </button>
     </div>
   );
 };

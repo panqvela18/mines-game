@@ -9,7 +9,8 @@ import { useGameStore } from "@/store/useGameStore";
 export const MinesHeader = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
-  const { user } = useGameStore();
+  const { user, betValue, multiplier, lastCashoutAmount, showCashoutPopup } =
+    useGameStore();
 
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
@@ -62,6 +63,11 @@ export const MinesHeader = () => {
 
       <div className="minesGame-header-right">
         <div className="minesGame-balance">
+          {showCashoutPopup && (
+            <div className="cashout-popup">
+              + {lastCashoutAmount.toFixed(2)} USD
+            </div>
+          )}
           <p>{user.getBalance().toFixed(2)}</p>
           <span>USD</span>
         </div>

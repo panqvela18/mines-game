@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "@/styles/minesGamePage/minesFooter.css";
 import Image from "next/image";
 import { betAmounts } from "@/utils/constants";
@@ -14,8 +14,17 @@ import { useGameStore } from "@/store/useGameStore";
 
 export const MinesFooter = () => {
   const [showBetDropdown, setShowBetDropdown] = useState(false);
-  const { betValue, setBetValue, startGame, gameStarted, user } =
-    useGameStore();
+  const {
+    betValue,
+    setBetValue,
+    startGame,
+    gameStarted,
+    multiplier,
+    cashout,
+    correctGuesses,
+  } = useGameStore();
+
+  const moneySoundRef = useRef<HTMLAudioElement | null>(null);
 
   const toggleBetDropdown = () => {
     setShowBetDropdown((prev) => !prev);
@@ -34,11 +43,27 @@ export const MinesFooter = () => {
   };
 
   const handleStartClick = () => {
-    startGame(); // ვკრავთ თამაშს Zustand-იდან
+    startGame();
+  };
+
+  const handleCashoutClick = () => {
+    cashout();
+    if (moneySoundRef.current) {
+      moneySoundRef.current.currentTime = 0;
+      moneySoundRef.current
+        .play()
+        .catch((err) => console.warn("Money sound failed:", err));
+    }
   };
 
   return (
     <div className="mines-game-footer">
+      <audio
+        ref={moneySoundRef}
+        preload="auto"
+        src="/mp3/cashier-quotka-chingquot-sound-effect-129698.mp3"
+      />
+
       <div className="change-bet-container">
         <div className="change-bet-input">
           <span>Bet USD</span>
@@ -115,18 +140,37 @@ export const MinesFooter = () => {
       </button>
 
       <button
-        className="bet-btn"
-        onClick={handleStartClick}
-        disabled={gameStarted}
-        style={{ opacity: gameStarted ? 0.5 : 1 }}
+        className={`${gameStarted ? "cashout-btn" : " bet-btn"}`}
+        onClick={
+          gameStarted && correctGuesses > 0
+            ? handleCashoutClick
+            : handleStartClick
+        }
+        disabled={gameStarted && correctGuesses === 0}
+        style={{ opacity: gameStarted && correctGuesses === 0 ? 0.5 : 1 }}
       >
-        <Image
-          src="https://turbo.spribegaming.com/icon-play.284324538612d258.svg"
-          alt="bet-icon"
-          width={20}
-          height={20}
-        />
-        <span>BET</span>
+        {!gameStarted && (
+          <Image
+            src="https://turbo.spribegaming.com/icon-play.284324538612d258.svg"
+            alt="bet-icon"
+            width={20}
+            height={20}
+          />
+        )}
+
+        <span>
+          {gameStarted ? (
+            correctGuesses === 0 ? (
+              "CASHOUT"
+            ) : (
+              <p className="cashout-p">
+                CASHOUT <span>{(betValue * multiplier).toFixed(2)} USD</span>
+              </p>
+            )
+          ) : (
+            "BET"
+          )}
+        </span>
       </button>
     </div>
   );

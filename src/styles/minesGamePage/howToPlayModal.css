@@ -91,7 +91,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .how-to-play-modal {
     padding: 20px;
     font-size: 14px;

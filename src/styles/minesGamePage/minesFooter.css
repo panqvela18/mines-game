@@ -8,6 +8,11 @@
   gap: 10px;
 }
 
+.footer-btn-container {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
 .change-bet-container {
   border: 1px solid rgba(0, 0, 0, 0.5);
   background-color: #0864a4;
@@ -17,12 +22,14 @@
   align-items: center;
   padding: 5px 10px;
   position: relative;
+  width: 100%;
 }
 
 .bet-dropdown {
   position: absolute;
   bottom: 100%;
   left: 0;
+  z-index: 50;
 }
 
 .bet-dropdown ul {
@@ -65,6 +72,7 @@
   text-align: center;
   background-color: #084494;
   color: white;
+  width: 100%;
   margin-top: 2px;
 }
 
@@ -186,4 +194,46 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+/* minesFooter.css */
+.bet-error-message {
+  position: absolute;
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-top: 6px;
+  animation: fadeOut 1s forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .mines-game-footer {
+    flex-direction: column-reverse;
+    padding: 10px 20%;
+  }
+  .footer-btn-container {
+    width: 80%;
+  }
+  .bet-dropdown {
+    left: auto;
+    right: 0;
+  }
+
+  .bet-dropdown ul {
+    grid-template-columns: repeat(1, 1fr);
+    height: 200px;
+    overflow-y: scroll;
+    z-index: 50;
+  }
 }

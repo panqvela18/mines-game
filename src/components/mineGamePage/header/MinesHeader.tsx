@@ -55,7 +55,7 @@ export const MinesHeader = () => {
               </g>
             </svg>
           </span>
-          How to play?
+          <p> How to play?</p>
         </button>
 
         <div className="fun-mode">FUN MODE</div>

@@ -22,6 +22,7 @@ export const MinesFooter = () => {
     multiplier,
     cashout,
     correctGuesses,
+    showInsufficientBalanceMessage,
   } = useGameStore();
 
   const moneySoundRef = useRef<HTMLAudioElement | null>(null);
@@ -74,6 +75,11 @@ export const MinesFooter = () => {
             value={betValue}
             onChange={handleInputChange}
           />
+          {showInsufficientBalanceMessage && (
+            <div className="bet-error-message">
+              Not enough balance to place bet
+            </div>
+          )}
         </div>
 
         <div className="change-price-container">
@@ -130,48 +136,53 @@ export const MinesFooter = () => {
         )}
       </div>
 
-      <button className="autoplay-btn">
-        <Image
-          src="https://turbo.spribegaming.com/icon-auto-play.4977be4170e6076b.svg"
-          alt="random-icon"
-          width={18}
-          height={18}
-        />
-      </button>
-
-      <button
-        className={`${gameStarted ? "cashout-btn" : " bet-btn"}`}
-        onClick={
-          gameStarted && correctGuesses > 0
-            ? handleCashoutClick
-            : handleStartClick
-        }
-        disabled={gameStarted && correctGuesses === 0}
-        style={{ opacity: gameStarted && correctGuesses === 0 ? 0.5 : 1 }}
+      <div
+        className="footer-btn-container"
+        style={{ display: "flex", width: "100%" }}
       >
-        {!gameStarted && (
+        <button className="autoplay-btn">
           <Image
-            src="https://turbo.spribegaming.com/icon-play.284324538612d258.svg"
-            alt="bet-icon"
-            width={20}
-            height={20}
+            src="https://turbo.spribegaming.com/icon-auto-play.4977be4170e6076b.svg"
+            alt="random-icon"
+            width={18}
+            height={18}
           />
-        )}
+        </button>
 
-        <span>
-          {gameStarted ? (
-            correctGuesses === 0 ? (
-              "CASHOUT"
-            ) : (
-              <p className="cashout-p">
-                CASHOUT <span>{(betValue * multiplier).toFixed(2)} USD</span>
-              </p>
-            )
-          ) : (
-            "BET"
+        <button
+          className={`${gameStarted ? "cashout-btn" : " bet-btn"}`}
+          onClick={
+            gameStarted && correctGuesses > 0
+              ? handleCashoutClick
+              : handleStartClick
+          }
+          disabled={gameStarted && correctGuesses === 0}
+          style={{ opacity: gameStarted && correctGuesses === 0 ? 0.5 : 1 }}
+        >
+          {!gameStarted && (
+            <Image
+              src="https://turbo.spribegaming.com/icon-play.284324538612d258.svg"
+              alt="bet-icon"
+              width={20}
+              height={20}
+            />
           )}
-        </span>
-      </button>
+
+          <span>
+            {gameStarted ? (
+              correctGuesses === 0 ? (
+                "CASHOUT"
+              ) : (
+                <p className="cashout-p">
+                  CASHOUT <span>{(betValue * multiplier).toFixed(2)} USD</span>
+                </p>
+              )
+            ) : (
+              "BET"
+            )}
+          </span>
+        </button>
+      </div>
     </div>
   );
 };

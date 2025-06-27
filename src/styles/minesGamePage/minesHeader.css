@@ -44,6 +44,7 @@
 .how-to-play-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   background-color: #f89414;
   color: black;
   border: none;
@@ -62,18 +63,20 @@
 }
 
 .fun-mode {
-  position: absolute;
-  top: 0;
-  right: 50%;
-  transform: translateX(50%);
-  padding: 5px 30px;
+  color: #fff;
   background-color: #f89414;
   border-radius: 0 0 10px 10px;
-  color: white;
-  display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   font-weight: bold;
+  display: flex;
+  position: absolute;
+  max-width: 120px;
+  width: 100%;
+  top: 0;
+  right: 50%;
+  height: 25px;
+  transform: translateX(50%);
 }
 
 .minesGame-header-right {
@@ -109,8 +112,28 @@
 /* responsive */
 
 @media (max-width: 768px) {
-  .how-to-play-modal {
-    padding: 20px;
-    font-size: 14px;
+  .how-to-play-btn {
+    padding: 5px;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    position: relative;
+  }
+
+  .how-to-play-btn p {
+    display: none;
+  }
+
+  .question-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .fun-mode {
+    top: 60px;
+  }
+  .minesGame-header-btn {
+    padding: 5px 30px;
   }
 }

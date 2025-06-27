@@ -96,3 +96,10 @@
   opacity: 0;
   cursor: pointer;
 }
+
+@media (max-width: 768px) {
+  .content-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

@@ -22,6 +22,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   explodedCellIndex: null,
   showAllMines: false,
   correctGuesses: 0,
+  showInsufficientBalanceMessage: false,
+setShowInsufficientBalanceMessage: (value: boolean) =>
+  set({ showInsufficientBalanceMessage: value }),
+
   setCorrectGuesses: (count) => set({ correctGuesses: count }),
   incrementCorrectGuesses: () =>
     set((state) => ({ correctGuesses: state.correctGuesses + 1 })),
@@ -78,28 +82,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setBetValue: (value) => set({ betValue: value }),
 
   startGame: () => {
-    const { user, betValue, minesCount } = get();
+  const { user, betValue, minesCount, setShowInsufficientBalanceMessage } = get();
 
-    if (!user.setBet(betValue)) {
-      console.warn("Not enough balance to place bet");
-      return;
-    }
+  if (!user.setBet(betValue)) {
+    setShowInsufficientBalanceMessage(true);
 
-    const newGame = new Game(25, minesCount);
+    setTimeout(() => {
+      setShowInsufficientBalanceMessage(false);
+    }, 2000);
 
-    const newUser = new User(user.getBalance());
+    return;
+  }
 
-    const initialMultiplier = getInitialMultiplier(minesCount);
+  const newGame = new Game(25, minesCount);
+  const newUser = new User(user.getBalance());
+  const initialMultiplier = getInitialMultiplier(minesCount);
 
-    set({
-      game: newGame,
-      gameStarted: true,
-      explodedCellIndex: null,
-      showAllMines: false,
-      user: newUser,
-      multiplier: initialMultiplier,
-    });
-  },
+  set({
+    game: newGame,
+    gameStarted: true,
+    explodedCellIndex: null,
+    showAllMines: false,
+    user: newUser,
+    multiplier: initialMultiplier,
+  });
+},
 
   reveal: (index) => {
     const {

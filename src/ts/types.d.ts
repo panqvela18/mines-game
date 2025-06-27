@@ -18,5 +18,8 @@ type GameStore = {
   resetMultiplier: () => void;
   cashout: () => void;
   lastCashoutAmount:number,
-  showCashoutPopup:boolean
+  showCashoutPopup:boolean,
+  showInsufficientBalanceMessage: boolean;
+setShowInsufficientBalanceMessage: (value: boolean) => void;
+
 };

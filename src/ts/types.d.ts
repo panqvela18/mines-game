@@ -17,9 +17,20 @@ type GameStore = {
   increaseMultiplier: () => void;
   resetMultiplier: () => void;
   cashout: () => void;
-  lastCashoutAmount:number,
-  showCashoutPopup:boolean,
+  lastCashoutAmount: number;
+  showCashoutPopup: boolean;
   showInsufficientBalanceMessage: boolean;
-setShowInsufficientBalanceMessage: (value: boolean) => void;
-
+  setShowInsufficientBalanceMessage: (value: boolean) => void;
+  randomSelectedBoxes: number[];
+  setRandomSelectedBoxes: (boxes: number[]) => void;
+  autoPlayRounds: number;
+  setAutoPlayRounds: (rounds: number) => void;
+  currentAutoRound: number;
+  startAutoPlay: () => void;
+  isAutoPlaying: boolean;
+  stopAutoPlay: () => void;
+  boxesToReveal: number;
+  setBoxesToReveal: (count: number) => void;
+  isAutoPlayEnabled: boolean;
+  setIsAutoPlayEnabled: (value: boolean) => void;
 };

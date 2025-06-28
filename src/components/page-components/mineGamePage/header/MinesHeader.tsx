@@ -9,8 +9,10 @@ import { useGameStore } from "@/store/useGameStore";
 export const MinesHeader = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
-  const { user, lastCashoutAmount, showCashoutPopup } =
+  const { user, lastCashoutAmount, showCashoutPopup, isAutoPlaying } =
     useGameStore();
+
+  console.log("isAutoPlaying:", isAutoPlaying);
 
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
@@ -25,7 +27,11 @@ export const MinesHeader = () => {
   return (
     <div className="minesGame-header">
       <div className="minesGame-header-left">
-        <button className="minesGame-header-btn" onClick={toggleDropdown}>
+        <button
+          className="minesGame-header-btn"
+          disabled={isAutoPlaying}
+          onClick={toggleDropdown}
+        >
           MINES
           <Image
             className="minesGame-header-btn-icon"

@@ -13,6 +13,13 @@ const coinSound =
 const explosionSound =
   typeof Audio !== "undefined" ? new Audio("/mp3/blast-37988.mp3") : null;
 
+
+  type AutoPlayController = {
+  shouldStop: boolean;
+};
+
+let autoPlayController: AutoPlayController = { shouldStop: false };
+
 export const useGameStore = create<GameStore>((set, get) => ({
   game: new Game(25, 3),
   user: new User(1000),
@@ -65,72 +72,97 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setIsAutoPlayEnabled: (value: boolean) =>
     set({ isAutoPlayEnabled: value }),
 
-  startAutoPlay: async () => {
+ startAutoPlay: async () => {
     const {
       autoPlayRounds,
       boxesToReveal,
-      randomSelectedBoxes,
-      setRandomSelectedBoxes,
       isAutoPlaying,
       betValue,
       user,
+      minesCount
     } = get();
 
     if (isAutoPlaying || autoPlayRounds <= 0) return;
 
-    set({ isAutoPlaying: true, currentAutoRound: 0 });
+    autoPlayController = { shouldStop: false };
+    set({ 
+      isAutoPlaying: true, 
+      currentAutoRound: 0,
+      randomSelectedBoxes: []
+    });
 
     for (let round = 1; round <= autoPlayRounds; round++) {
-      if (user.getBalance() < betValue) break;
+      if (autoPlayController.shouldStop || user.getBalance() < betValue) break;
+
+      const initialMultiplier = getInitialMultiplier(minesCount);
+      set({
+        game: new Game(25, minesCount),
+        gameStarted: false,
+        explodedCellIndex: null,
+        showAllMines: false,
+        multiplier: initialMultiplier,
+        correctGuesses: 0,
+        showCashoutPopup: false,
+        randomSelectedBoxes: []
+      });
+
+      await new Promise(r => setTimeout(r, 100));
 
       get().startGame();
-      await new Promise((r) => setTimeout(r, 300));
+      if (!get().gameStarted) continue;
+      
+      await new Promise(r => setTimeout(r, 600));
 
-      let selected = [...randomSelectedBoxes];
+      const allIndexes = Array.from({ length: 25 }, (_, i) => i);
+      const shuffled = [...allIndexes].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, boxesToReveal);
+      
+      set({ randomSelectedBoxes: selected });
+      await new Promise(r => setTimeout(r, 100));
 
-      if (selected.length < boxesToReveal) {
-        const allIndexes = Array.from({ length: 25 }, (_, i) => i);
-        const used = new Set(selected);
-
-        while (selected.length < boxesToReveal && selected.length < 24) {
-          const randIndex = Math.floor(Math.random() * allIndexes.length);
-          const candidate = allIndexes[randIndex];
-          if (!used.has(candidate)) {
-            selected.push(candidate);
-            used.add(candidate);
-          }
-        }
-      }
-
-      selected = selected.slice(0, boxesToReveal);
-      setRandomSelectedBoxes(selected);
-
-      let exploded = false;
-
+      let shouldContinue = true;
       for (const box of selected) {
-        const { gameStarted } = get();
-        if (!gameStarted) {
-          exploded = true;
+        if (autoPlayController.shouldStop || !get().gameStarted) {
+          shouldContinue = false;
           break;
         }
+        
         get().reveal(box);
-        await new Promise((r) => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 800));
+        
+        if (get().explodedCellIndex !== null) {
+          shouldContinue = false;
+          await new Promise(r => setTimeout(r, 2000));
+          break;
+        }
       }
 
-      if (!exploded) {
+      if (!autoPlayController.shouldStop && shouldContinue && get().correctGuesses === boxesToReveal) {
         get().cashout();
-        await new Promise((r) => setTimeout(r, 1500));
+        await new Promise(r => setTimeout(r, 2000));
       }
 
-      set({ currentAutoRound: round });
+      if (!autoPlayController.shouldStop) {
+        set({ currentAutoRound: round });
+      }
     }
 
-    set({ isAutoPlaying: false,  randomSelectedBoxes: [],
- });
+    if (!autoPlayController.shouldStop) {
+      set({ 
+        isAutoPlaying: false, 
+        randomSelectedBoxes: [] 
+      });
+    }
   },
 
   stopAutoPlay: () => {
-    set({ isAutoPlaying: false, autoPlayRounds: 0, currentAutoRound: 0 });
+    autoPlayController.shouldStop = true;
+    set({ 
+      isAutoPlaying: false, 
+      autoPlayRounds: 0, 
+      currentAutoRound: 0,
+      gameStarted: false
+    });
   },
 
   cashout: () => {

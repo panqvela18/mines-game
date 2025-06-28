@@ -27,13 +27,17 @@ export const MinesFooter = () => {
     correctGuesses,
     showInsufficientBalanceMessage,
     isAutoPlayEnabled,
+    isAutoPlaying,
+    stopAutoPlay,
   } = useGameStore();
 
   const moneySoundRef = useRef<HTMLAudioElement | null>(null);
 
   const toggleBetDropdown = () => {
+    if (isAutoPlaying) stopAutoPlay();
     setShowBetDropdown((prev) => !prev);
   };
+
   const toggleAutoPlayOptions = () => {
     setShowAutoPlayOptions((prev) => !prev);
   };
@@ -64,6 +68,32 @@ export const MinesFooter = () => {
     }
   };
 
+  const handleBetClick = () => {
+    if (isAutoPlaying) {
+      stopAutoPlay();
+    }
+
+    if (gameStarted && correctGuesses > 0) {
+      handleCashoutClick();
+    } else {
+      handleStartClick();
+    }
+  };
+
+  const handleIncrementClick = () => {
+    if (isAutoPlaying) stopAutoPlay();
+    incrementBetValue(betAmounts, parsedBetValue, (increm) =>
+      setBetValue(parseFloat(increm))
+    );
+  };
+
+  const handleDecrementClick = () => {
+    if (isAutoPlaying) stopAutoPlay();
+    decrementBetValue(betAmounts, parsedBetValue, (decrem) =>
+      setBetValue(parseFloat(decrem))
+    );
+  };
+
   return (
     <div className="mines-game-footer">
       <audio
@@ -90,14 +120,7 @@ export const MinesFooter = () => {
         </div>
 
         <div className="change-price-container">
-          <button
-            type="button"
-            onClick={() =>
-              decrementBetValue(betAmounts, parsedBetValue, (v) =>
-                setBetValue(parseFloat(v))
-              )
-            }
-          >
+          <button type="button" onClick={handleDecrementClick}>
             <Image
               src="https://turbo.spribegaming.com/icon-minus.496f2e671ff32d15.svg"
               alt="minus icon"
@@ -118,14 +141,7 @@ export const MinesFooter = () => {
               height={12}
             />
           </button>
-          <button
-            type="button"
-            onClick={() =>
-              incrementBetValue(betAmounts, parsedBetValue, (v) =>
-                setBetValue(parseFloat(v))
-              )
-            }
-          >
+          <button type="button" onClick={handleIncrementClick}>
             <Image
               src="https://turbo.spribegaming.com/icon-plus.feaff32a610ebd64.svg"
               alt="plus icon"
@@ -148,16 +164,26 @@ export const MinesFooter = () => {
         style={{ display: "flex", width: "100%" }}
       >
         <button
-          disabled={!isAutoPlayEnabled || gameStarted}
-          onClick={toggleAutoPlayOptions}
-          style={
-            !isAutoPlayEnabled || gameStarted ? { opacity: "0.5" } : undefined
-          }
-          className="autoplay-btn"
+          disabled={gameStarted || !isAutoPlayEnabled}
+          onClick={() => {
+            if (isAutoPlaying) {
+              stopAutoPlay();
+            } else {
+              toggleAutoPlayOptions();
+            }
+          }}
+          style={{
+            backgroundColor: isAutoPlaying ? "#ff4444" : "transparent",
+            backgroundImage: isAutoPlaying ? "none" : undefined,
+            color: isAutoPlaying ? "white" : "inherit",
+            opacity:
+              !isAutoPlayEnabled || (gameStarted && !isAutoPlaying) ? 0.5 : 1,
+          }}
+          className={`autoplay-btn ${isAutoPlaying ? "autoplay-active" : ""}`}
         >
           <Image
             src="https://turbo.spribegaming.com/icon-auto-play.4977be4170e6076b.svg"
-            alt="random-icon"
+            alt="auto-play-icon"
             width={18}
             height={18}
           />
@@ -169,11 +195,7 @@ export const MinesFooter = () => {
 
         <button
           className={`${gameStarted ? "cashout-btn" : " bet-btn"}`}
-          onClick={
-            gameStarted && correctGuesses > 0
-              ? handleCashoutClick
-              : handleStartClick
-          }
+          onClick={handleBetClick}
           disabled={gameStarted && correctGuesses === 0}
           style={{ opacity: gameStarted && correctGuesses === 0 ? 0.5 : 1 }}
         >
@@ -185,7 +207,6 @@ export const MinesFooter = () => {
               height={20}
             />
           )}
-
           <span>
             {gameStarted ? (
               correctGuesses === 0 ? (

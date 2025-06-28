@@ -8,6 +8,7 @@ export const MinesGrid = () => {
     gameStarted,
     explodedCellIndex,
     showAllMines,
+
     randomSelectedBoxes = [],
   } = useGameStore();
 
@@ -30,7 +31,11 @@ export const MinesGrid = () => {
             className={`
               mine-cell 
               ${shouldReveal ? "revealed" : ""}
-              ${!shouldReveal && isRandomSelected ? "random-selected" : ""}
+              ${
+                !shouldReveal && isRandomSelected && gameStarted
+                  ? "random-selected"
+                  : ""
+              }
             `}
             onClick={() => gameStarted && reveal(index)}
           >

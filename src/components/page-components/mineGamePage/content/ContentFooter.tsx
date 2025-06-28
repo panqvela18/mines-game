@@ -5,7 +5,8 @@ import "@/styles/minesGamePage/contentFooter.css";
 import { useGameStore } from "@/store/useGameStore";
 
 export default function ContentFooter() {
-  const { isAutoPlayEnabled, setIsAutoPlayEnabled } = useGameStore();
+  const { isAutoPlayEnabled, setIsAutoPlayEnabled, stopAutoPlay } =
+    useGameStore();
 
   const handleToggle = () => {
     setIsAutoPlayEnabled(!isAutoPlayEnabled);
@@ -13,7 +14,13 @@ export default function ContentFooter() {
 
   return (
     <div className="content-footer">
-      <button className="autoplay-bt" onClick={handleToggle}>
+      <button
+        className="autoplay-bt"
+        onClick={() => {
+          handleToggle();
+          stopAutoPlay();
+        }}
+      >
         <Image
           src={"https://turbo.spribegaming.com/assets/icons/icon-auto-game.svg"}
           alt="autoPlay"
@@ -22,7 +29,13 @@ export default function ContentFooter() {
           className="autoplay-icon"
         />
 
-        <div className="checkbox-apple" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="checkbox-apple"
+          onClick={(e) => {
+            e.stopPropagation();
+            stopAutoPlay();
+          }}
+        >
           <input
             className="yep"
             id="check-apple"

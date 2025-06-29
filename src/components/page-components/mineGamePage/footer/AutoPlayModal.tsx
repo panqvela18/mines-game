@@ -1,7 +1,10 @@
 import { minesAmount, numberOfRounds } from "@/utils/constants";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "@/styles/minesGamePage/autoPlayModal.css";
 import { useGameStore } from "@/store/useGameStore";
+import Grid from "./Grid";
+import BalanceLimitInput from "./BalanceLimitInput";
+import BetStrategySelector from "./BetStrategySelector";
 
 export const AutoPlayModal = ({
   toggleAutoPlayOptions,
@@ -11,8 +14,33 @@ export const AutoPlayModal = ({
   const [rounds, setRounds] = useState<number>(3);
   const [randomCell, setRandomCell] = useState<number>(1);
   const [minBalance, setMinBalance] = useState<number>(0);
-  const [maxBalance, setMaxBalance] = useState<number>(0);
-  console.log("Limits → Min:", minBalance, "Max:", maxBalance);
+  const [maxBalance, setMaxBalance] = useState<number>(Infinity);
+  const [isMinBalanceEnabled, setIsMinBalanceEnabled] = useState(false);
+  const [isMaxBalanceEnabled, setIsMaxBalanceEnabled] = useState(false);
+  const [betStrategy, setBetStrategy] = useState<
+    "same" | "increase" | "decrease"
+  >("same");
+  const [loseChangePercent, setLoseChangePercent] = useState<number>(10);
+  const [winChangePercent, setWinChangePercent] = useState<number>(10);
+  const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
+
+  const [winStrategy, setWinStrategy] = useState<
+    "same" | "increase" | "decrease"
+  >("same");
+
+  const toggleMoreOptions = () => {
+    setShowMoreOptions((prev) => !prev);
+  };
+  useEffect(() => {
+    setAutoPlayLoseStrategy({
+      type: betStrategy,
+      percentage: loseChangePercent,
+    });
+    setAutoPlayWinStrategy({
+      type: winStrategy,
+      percentage: winChangePercent,
+    });
+  }, [betStrategy, loseChangePercent, winStrategy, winChangePercent]);
 
   const {
     setAutoPlayRounds,
@@ -20,18 +48,22 @@ export const AutoPlayModal = ({
     startAutoPlay,
     minesCount,
     setAutoPlayBalanceLimits,
+    setAutoPlayLoseStrategy,
+    setAutoPlayWinStrategy,
   } = useGameStore();
 
   const handleAutoPlayStart = () => {
+    const finalMinBalance = isMinBalanceEnabled ? minBalance : 0;
+    const finalMaxBalance = isMaxBalanceEnabled ? maxBalance : Infinity;
     setBoxesToReveal(randomCell);
     setAutoPlayRounds(rounds);
-    setAutoPlayBalanceLimits(minBalance, maxBalance);
+    setAutoPlayBalanceLimits(finalMinBalance, finalMaxBalance);
     startAutoPlay();
   };
 
   return (
     <div className="how-to-play-modal-backdrop" onClick={toggleAutoPlayOptions}>
-      <div className="how-to-play-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="autoplay-modal" onClick={(e) => e.stopPropagation()}>
         <button className="close-modal-btn" onClick={toggleAutoPlayOptions}>
           ×
         </button>
@@ -45,63 +77,64 @@ export const AutoPlayModal = ({
           }}
         ></div>
         <div>
-          <h4 className="round-title">Number of rounds</h4>
-          <div className="rounds-grid-container">
-            {numberOfRounds.map((round, idx) => {
-              return (
-                <button
-                  onClick={() => setRounds(round)}
-                  style={
-                    round === rounds
-                      ? { backgroundColor: "#555961" }
-                      : { backgroundColor: "#393b3f" }
-                  }
-                  key={idx}
-                >
-                  {round}
-                </button>
-              );
-            })}
-          </div>
-          <h5 className="random-title">Number of random</h5>
-          <div className="random-grid-container">
-            {minesAmount.slice(0, 25 - minesCount).map((mine, idx) => {
-              return (
-                <button
-                  onClick={() => setRandomCell(mine)}
-                  style={
-                    mine === randomCell
-                      ? { backgroundColor: "#555961" }
-                      : { backgroundColor: "#393b3f" }
-                  }
-                  key={idx}
-                >
-                  {mine}
-                </button>
-              );
-            })}
-          </div>
+          <Grid
+            title="Number of rounds"
+            items={numberOfRounds}
+            selectedItem={rounds}
+            onItemClick={setRounds}
+            className="rounds-grid-container"
+          />
+          <Grid
+            title="Number of randoms"
+            items={minesAmount}
+            maxCount={25 - minesCount}
+            selectedItem={randomCell}
+            onItemClick={setRandomCell}
+            className="random-grid-container"
+          />
           <div className="balance-limits-container">
-            <input
-              type="number"
-              value={minBalance !== 0 ? minBalance : ""}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                setMinBalance(isNaN(value) ? 0 : value);
-              }}
-              placeholder="No minimum"
+            <h4 className="round-title">Balance limitations</h4>
+            <BalanceLimitInput
+              id="min-balance-checkbox"
+              label="Stop if cash decreases by"
+              value={minBalance}
+              enabled={isMinBalanceEnabled}
+              onToggle={setIsMinBalanceEnabled}
+              onChange={setMinBalance}
             />
 
-            <input
-              type="number"
-              value={maxBalance !== Infinity ? maxBalance : ""}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                setMaxBalance(isNaN(value) ? Infinity : value);
-              }}
-              placeholder="No maximum"
+            <BalanceLimitInput
+              id="max-balance-checkbox"
+              label="Stop if cash increases by"
+              value={maxBalance}
+              enabled={isMaxBalanceEnabled}
+              onToggle={setIsMaxBalanceEnabled}
+              onChange={setMaxBalance}
             />
           </div>
+          <button onClick={toggleMoreOptions} className="more-option-btn">
+            More options
+          </button>
+
+          {showMoreOptions && (
+            <>
+              <BetStrategySelector
+                title="Bet strategy after loss"
+                strategy={betStrategy}
+                percentage={loseChangePercent}
+                onStrategyChange={setBetStrategy}
+                onPercentageChange={setLoseChangePercent}
+              />
+
+              <BetStrategySelector
+                title="Bet strategy after win"
+                strategy={winStrategy}
+                percentage={winChangePercent}
+                onStrategyChange={setWinStrategy}
+                onPercentageChange={setWinChangePercent}
+              />
+            </>
+          )}
 
           <button
             onClick={() => {

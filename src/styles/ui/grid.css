@@ -1,0 +1,26 @@
+.round-title,
+.random-title {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.rounds-grid-container,
+.random-grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.random-grid-container {
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
+.rounds-grid-container button,
+.random-grid-container button {
+  background-color: #393b3f;
+  color: var(--text-primary);
+  height: 25px;
+  border-radius: 10px;
+  border: none;
+}

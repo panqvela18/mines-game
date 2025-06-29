@@ -6,18 +6,10 @@ import {
   getMultiplierIncrease,
 } from "@/utils/generateMultiplier";
 
-const coinSound =
-  typeof Audio !== "undefined"
-    ? new Audio("/mp3/coin-recieved-230517.mp3")
-    : null;
-const explosionSound =
-  typeof Audio !== "undefined" ? new Audio("/mp3/blast-37988.mp3") : null;
+const coinSound = typeof Audio !== "undefined" ? new Audio("/mp3/coin-recieved-230517.mp3") : null;
+const explosionSound = typeof Audio !== "undefined" ? new Audio("/mp3/blast-37988.mp3") : null;
 
-
-  type AutoPlayController = {
-  shouldStop: boolean;
-};
-
+type AutoPlayController = { shouldStop: boolean };
 let autoPlayController: AutoPlayController = { shouldStop: false };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -35,7 +27,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ boxesToReveal: Math.max(1, Math.min(24, count)) }),
 
   showInsufficientBalanceMessage: false,
-  setShowInsufficientBalanceMessage: (value: boolean) =>
+  setShowInsufficientBalanceMessage: (value) =>
     set({ showInsufficientBalanceMessage: value }),
 
   setCorrectGuesses: (count) => set({ correctGuesses: count }),
@@ -46,14 +38,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   increaseMultiplier: () => {
     const { multiplier, minesCount } = get();
     const increaseRate = getMultiplierIncrease(minesCount);
-    const newMultiplier = multiplier * (1 + increaseRate);
-    set({ multiplier: newMultiplier });
+    set({ multiplier: multiplier * (1 + increaseRate) });
   },
 
   resetMultiplier: () => {
     const { minesCount } = get();
-    const initialMultiplier = getInitialMultiplier(minesCount);
-    set({ multiplier: initialMultiplier });
+    set({ multiplier: getInitialMultiplier(minesCount) });
   },
 
   lastCashoutAmount: 0,
@@ -67,58 +57,56 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   currentAutoRound: 0,
   isAutoPlaying: false,
-
   isAutoPlayEnabled: false,
-  setIsAutoPlayEnabled: (value: boolean) =>
-    set({ isAutoPlayEnabled: value }),
+  setIsAutoPlayEnabled: (value) => set({ isAutoPlayEnabled: value }),
 
- startAutoPlay: async () => {
-    const {
-      autoPlayRounds,
-      boxesToReveal,
-      isAutoPlaying,
-      betValue,
-      user,
-      minesCount
-    } = get();
+  autoPlayBalanceLimits: { min: 0, max: Infinity },
+  setAutoPlayBalanceLimits: (min, max) =>
+    set({ autoPlayBalanceLimits: { min, max } }),
 
+  startAutoPlay: async () => {
+    const { autoPlayRounds, boxesToReveal, isAutoPlaying, stopAutoPlay } = get();
     if (isAutoPlaying || autoPlayRounds <= 0) return;
 
     autoPlayController = { shouldStop: false };
-    set({ 
-      isAutoPlaying: true, 
-      currentAutoRound: 0,
-      randomSelectedBoxes: []
-    });
+    set({ isAutoPlaying: true, currentAutoRound: 0, randomSelectedBoxes: [] });
 
     for (let round = 1; round <= autoPlayRounds; round++) {
-      if (autoPlayController.shouldStop || user.getBalance() < betValue) break;
+      const { user, betValue, autoPlayBalanceLimits, minesCount } = get();
+      const currentBalance = user.getBalance();
 
-      const initialMultiplier = getInitialMultiplier(minesCount);
+      console.log("Balance:", currentBalance, "Min:", autoPlayBalanceLimits.min, "Max:", autoPlayBalanceLimits.max);
+
+      if (
+        autoPlayController.shouldStop ||
+        (autoPlayBalanceLimits.min > 0 && currentBalance <= autoPlayBalanceLimits.min) ||
+        (autoPlayBalanceLimits.max !== Infinity && currentBalance >= autoPlayBalanceLimits.max) ||
+        currentBalance < betValue
+      ) {
+        stopAutoPlay();
+        break;
+      }
+
       set({
         game: new Game(25, minesCount),
         gameStarted: false,
         explodedCellIndex: null,
         showAllMines: false,
-        multiplier: initialMultiplier,
+        multiplier: getInitialMultiplier(minesCount),
         correctGuesses: 0,
         showCashoutPopup: false,
-        randomSelectedBoxes: []
+        randomSelectedBoxes: [],
       });
 
-      await new Promise(r => setTimeout(r, 100));
-
+      await new Promise((r) => setTimeout(r, 100));
       get().startGame();
       if (!get().gameStarted) continue;
-      
-      await new Promise(r => setTimeout(r, 600));
 
-      const allIndexes = Array.from({ length: 25 }, (_, i) => i);
-      const shuffled = [...allIndexes].sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, boxesToReveal);
-      
+      await new Promise((r) => setTimeout(r, 600));
+
+      const selected = [...Array(25).keys()].sort(() => 0.5 - Math.random()).slice(0, boxesToReveal);
       set({ randomSelectedBoxes: selected });
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise((r) => setTimeout(r, 100));
 
       let shouldContinue = true;
       for (const box of selected) {
@@ -126,20 +114,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
           shouldContinue = false;
           break;
         }
-        
         get().reveal(box);
-        await new Promise(r => setTimeout(r, 800));
-        
+        await new Promise((r) => setTimeout(r, 800));
         if (get().explodedCellIndex !== null) {
           shouldContinue = false;
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise((r) => setTimeout(r, 2000));
           break;
         }
       }
 
       if (!autoPlayController.shouldStop && shouldContinue && get().correctGuesses === boxesToReveal) {
         get().cashout();
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise((r) => setTimeout(r, 2000));
       }
 
       if (!autoPlayController.shouldStop) {
@@ -148,21 +134,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     if (!autoPlayController.shouldStop) {
-      set({ 
-        isAutoPlaying: false, 
-        randomSelectedBoxes: [] 
-      });
+      set({ isAutoPlaying: false, randomSelectedBoxes: [] });
     }
   },
 
   stopAutoPlay: () => {
     autoPlayController.shouldStop = true;
-    set({ 
-      isAutoPlaying: false, 
-      autoPlayRounds: 0, 
-      currentAutoRound: 0,
-      gameStarted: false
-    });
+    set({ isAutoPlaying: false, autoPlayRounds: 0, currentAutoRound: 0, gameStarted: false });
   },
 
   cashout: () => {
@@ -170,11 +148,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const cashoutAmount = betValue * multiplier;
     user.addBalance(cashoutAmount);
 
-    const initialMultiplier = getInitialMultiplier(minesCount);
-
     set({
       gameStarted: false,
-      multiplier: initialMultiplier,
+      multiplier: getInitialMultiplier(minesCount),
       explodedCellIndex: null,
       showAllMines: true,
       correctGuesses: 0,
@@ -184,84 +160,54 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     setTimeout(() => {
       const { minesCount } = get();
-
       set({
         game: new Game(25, minesCount),
         gameStarted: false,
         explodedCellIndex: null,
         showAllMines: false,
-        multiplier: initialMultiplier,
+        multiplier: getInitialMultiplier(minesCount),
         showCashoutPopup: false,
       });
     }, 2000);
   },
 
-  setMineCount: (count) => {
-    const initialMultiplier = getInitialMultiplier(count);
-    set({ minesCount: count, multiplier: initialMultiplier });
-  },
+  setMineCount: (count) =>
+    set({ minesCount: count, multiplier: getInitialMultiplier(count) }),
 
   setBetValue: (value) => set({ betValue: value }),
 
   startGame: () => {
-    const { user, betValue, minesCount, setShowInsufficientBalanceMessage } =
-      get();
-
+    const { user, betValue, minesCount, setShowInsufficientBalanceMessage } = get();
     if (!user.setBet(betValue)) {
       setShowInsufficientBalanceMessage(true);
-
-      setTimeout(() => {
-        setShowInsufficientBalanceMessage(false);
-      }, 2000);
-
+      setTimeout(() => setShowInsufficientBalanceMessage(false), 2000);
       return;
     }
 
-    const newGame = new Game(25, minesCount);
-    const newUser = new User(user.getBalance());
-    const initialMultiplier = getInitialMultiplier(minesCount);
-
     set({
-      game: newGame,
+      game: new Game(25, minesCount),
       gameStarted: true,
       explodedCellIndex: null,
       showAllMines: false,
-      user: newUser,
-      multiplier: initialMultiplier,
+      user: new User(user.getBalance()),
+      multiplier: getInitialMultiplier(minesCount),
     });
   },
 
   reveal: (index) => {
-    const {
-      game,
-      user,
-      gameStarted,
-      minesCount,
-      increaseMultiplier,
-      incrementCorrectGuesses,
-    } = get();
-
+    const { game, user, gameStarted, minesCount, increaseMultiplier, incrementCorrectGuesses } = get();
     if (!gameStarted) return;
 
     const result = game.revealCell(index);
-
     if (result === "mine") {
       user.lose();
-
-      if (explosionSound) {
-        explosionSound.currentTime = 0;
-        explosionSound
-          .play()
-          .catch((err) => console.warn("Explosion sound failed:", err));
-      }
-
-      const initialMultiplier = getInitialMultiplier(minesCount);
+      explosionSound?.play().catch((err) => console.warn("Explosion sound failed:", err));
 
       set({
         gameStarted: false,
         explodedCellIndex: index,
         showAllMines: true,
-        multiplier: initialMultiplier,
+        multiplier: getInitialMultiplier(minesCount),
         correctGuesses: 0,
       });
 
@@ -271,7 +217,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           gameStarted: false,
           explodedCellIndex: null,
           showAllMines: false,
-          multiplier: initialMultiplier,
+          multiplier: getInitialMultiplier(minesCount),
         });
       }, 2000);
 
@@ -280,12 +226,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     incrementCorrectGuesses();
     increaseMultiplier();
-
-    if (coinSound) {
-      coinSound.currentTime = 0;
-      coinSound.play().catch((err) => console.warn("Coin sound failed:", err));
-    }
-
+    coinSound?.play().catch((err) => console.warn("Coin sound failed:", err));
     set({ game, user });
   },
 }));

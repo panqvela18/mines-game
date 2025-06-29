@@ -1,3 +1,8 @@
+type AutoPlayBalanceLimits = {
+  min: number;
+  max: number;
+};
+
 type GameStore = {
   game: Game;
   user: User;
@@ -33,4 +38,8 @@ type GameStore = {
   setBoxesToReveal: (count: number) => void;
   isAutoPlayEnabled: boolean;
   setIsAutoPlayEnabled: (value: boolean) => void;
+
+  // ✅ New fields for balance limits
+  autoPlayBalanceLimits: AutoPlayBalanceLimits;
+  setAutoPlayBalanceLimits: (min: number, max: number) => void;
 };

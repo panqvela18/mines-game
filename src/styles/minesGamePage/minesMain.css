@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: black;
+  background-color: var(--text-secondary);
 }
 
 .minesGame-container {
@@ -16,5 +16,5 @@
   min-width: 320px;
   background-color: #007bff;
   border-radius: 20px;
-  border: 1px solid #f89414;
+  border: 1px solid var(--secondary);
 }

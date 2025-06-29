@@ -5,11 +5,13 @@ import "@/styles/minesGamePage/contentFooter.css";
 import { useGameStore } from "@/store/useGameStore";
 
 export default function ContentFooter() {
-  const { isAutoPlayEnabled, setIsAutoPlayEnabled, stopAutoPlay } =
+  const { isAutoPlayEnabled, setIsAutoPlayEnabled, stopAutoPlay, gameStarted } =
     useGameStore();
 
   const handleToggle = () => {
-    setIsAutoPlayEnabled(!isAutoPlayEnabled);
+    if (!gameStarted) {
+      setIsAutoPlayEnabled(!isAutoPlayEnabled);
+    }
   };
 
   return (
@@ -32,6 +34,11 @@ export default function ContentFooter() {
         <div
           className="checkbox-apple"
           onClick={(e) => {
+            if (gameStarted) {
+              e.stopPropagation();
+              return;
+            }
+
             e.stopPropagation();
             stopAutoPlay();
           }}
@@ -41,7 +48,12 @@ export default function ContentFooter() {
             id="check-apple"
             type="checkbox"
             checked={isAutoPlayEnabled}
-            onChange={handleToggle}
+            onChange={(e) => {
+              if (!gameStarted) {
+                setIsAutoPlayEnabled(e.target.checked);
+              }
+            }}
+            disabled={gameStarted}
           />
           <label htmlFor="check-apple"></label>
         </div>

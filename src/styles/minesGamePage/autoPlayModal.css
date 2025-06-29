@@ -12,25 +12,29 @@
 }
 
 .random-grid-container {
-  height: 200px;
+  max-height: 200px;
   overflow-y: scroll;
 }
 
 .rounds-grid-container button,
 .random-grid-container button {
   background-color: #393b3f;
-  color: white;
+  color: var(--text-primary);
   padding: 5px;
   border-radius: 10px;
   border: none;
 }
 .autoplay-inner-btn {
   width: 100%;
-  background-image: radial-gradient(circle at 50% 50%, #61a503, #2d7500 94%);
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    var(--accent-success),
+    var(--accent-success-dark) 94%
+  );
   margin: 10px 0;
   height: 50px;
   border-radius: 20px;
   border: none;
-  color: white;
+  color: var(--text-primary);
   font-weight: bold;
 }

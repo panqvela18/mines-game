@@ -20,7 +20,7 @@ export const HowToPlayModal = ({
           style={{
             width: "100%",
             height: "1px",
-            backgroundColor: "gray",
+            backgroundColor: "var(--text-gray)",
             opacity: "0.3",
           }}
         ></div>

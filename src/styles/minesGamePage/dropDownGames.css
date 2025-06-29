@@ -12,7 +12,7 @@
 }
 
 .dropdown-game-name {
-  color: white;
+  color: var(--text-primary);
   font-size: 12px;
   letter-spacing: 1px;
   margin-top: 10px;

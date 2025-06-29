@@ -5,7 +5,7 @@
   padding: 2px;
   border-radius: 20px;
   justify-content: space-between;
-  background-color: #084494;
+  background-color: var(--bg-dark-blue);
 }
 
 .minesGame-header-left {
@@ -18,9 +18,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white;
-  background-color: #0267a5;
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+  background-color: var(--bg-dark-blue-light);
+  border: 1px solid var(--border-dark);
   transition: opacity 0.15s ease-in-out, background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   position: relative;
@@ -32,7 +32,7 @@
 .minesGame-header-btn:hover {
   background-color: #055f96;
   opacity: 0.8;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 8px var(--shadow-light);
 }
 .minesGame-header-btn-icon {
   position: absolute;
@@ -45,8 +45,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f89414;
-  color: black;
+  background-color: var(--secondary);
+  color: var(--text-secondary);
   border: none;
   padding: 5px 50px;
   border-radius: 20px;
@@ -64,7 +64,7 @@
 
 .fun-mode {
   color: #fff;
-  background-color: #f89414;
+  background-color: var(--secondary);
   border-radius: 0 0 10px 10px;
   justify-content: center;
   align-items: center;
@@ -89,7 +89,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--text-primary);
   font-weight: 500;
   margin-right: 15px;
 }
@@ -103,9 +103,9 @@
   align-items: center;
   justify-content: center;
   padding: 5px;
-  background-color: #0267a5;
+  background-color: var(--bg-dark-blue-light);
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-dark);
   cursor: pointer;
 }
 

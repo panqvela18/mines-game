@@ -3,13 +3,16 @@ import React from "react";
 import Image from "next/image";
 import "@/styles/minesGamePage/contentFooter.css";
 import { useGameStore } from "@/store/useGameStore";
+import Checkbox from "@/components/ui/Checkbox";
 
 export default function ContentFooter() {
-  const { isAutoPlayEnabled, setIsAutoPlayEnabled, stopAutoPlay } =
+  const { isAutoPlayEnabled, setIsAutoPlayEnabled, stopAutoPlay, gameStarted } =
     useGameStore();
 
   const handleToggle = () => {
-    setIsAutoPlayEnabled(!isAutoPlayEnabled);
+    if (!gameStarted) {
+      setIsAutoPlayEnabled(!isAutoPlayEnabled);
+    }
   };
 
   return (
@@ -29,22 +32,21 @@ export default function ContentFooter() {
           className="autoplay-icon"
         />
 
-        <div
-          className="checkbox-apple"
-          onClick={(e) => {
-            e.stopPropagation();
-            stopAutoPlay();
+        <Checkbox
+          id="check-apple"
+          checked={isAutoPlayEnabled}
+          onChange={(checked) => {
+            if (!gameStarted) {
+              setIsAutoPlayEnabled(checked);
+            }
           }}
-        >
-          <input
-            className="yep"
-            id="check-apple"
-            type="checkbox"
-            checked={isAutoPlayEnabled}
-            onChange={handleToggle}
-          />
-          <label htmlFor="check-apple"></label>
-        </div>
+          onClick={() => {
+            if (!gameStarted) {
+              stopAutoPlay();
+            }
+          }}
+          disabled={gameStarted}
+        />
 
         <span>Auto Game</span>
       </button>

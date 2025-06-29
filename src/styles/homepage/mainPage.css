@@ -7,14 +7,14 @@
 
 .main-title {
   font-size: 2.5rem;
-  color: black;
+  color: var(--text-secondary);
   text-align: center;
   margin-top: 20px;
 }
 
 .play-btn {
-  background-color: #2e2691;
-  color: white;
+  background-color: var(--primary);
+  color: var(--text-primary);
   padding: 10px 40px;
   margin-top: 30px;
   border: none;
@@ -29,7 +29,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--border-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -37,24 +37,24 @@
 }
 
 .modal-content {
-  background-color: white;
+  background-color: var(--text-primary);
   padding: 2rem;
   border-radius: 12px;
   text-align: center;
   max-width: 500px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px var(--shadow-dark);
 }
 
 .responsible-gaming {
   font-weight: 600;
-  color: black;
+  color: var(--text-secondary);
   font-size: 24px;
   margin-bottom: 10px;
 }
 
 .age-verification-text {
   font-size: 18px;
-  color: #4b5563;
+  color: var(--text-gray);
   margin-bottom: 10px;
 }
 
@@ -69,7 +69,7 @@
   padding: 10px 30px;
   border: none;
   background-color: blue;
-  color: white;
+  color: var(--text-primary);
   border-radius: 30px;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -89,19 +89,5 @@
 .modal-confirm-btn:hover,
 .modal-cancel-btn:hover {
   background-color: #1e40af;
-  color: white;
+  color: var(--text-primary);
 }
-
-/* .modal-buttons button {
-  padding: 0.5rem 1rem;
-  border: none;
-  background-color: #1f2937;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.modal-buttons button:hover {
-  background-color: #111827;
-} */

@@ -8,10 +8,10 @@
 }
 
 .mine-cell {
-  background: #0d2b52;
+  background: var(--mine-cell);
   aspect-ratio: 5 / 4;
   border-radius: 10px;
-  box-shadow: 0 3px 0 #07203b;
+  box-shadow: 0 3px 0 var(--mine-cell-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,13 +27,13 @@
 .mine-dot {
   width: 20px;
   height: 20px;
-  background: radial-gradient(circle, #3170ff, #0b2b4b);
+  background: radial-gradient(circle, var(--mine-dot), var(--mine-dot-bg));
   border-radius: 50%;
   opacity: 0.8;
 }
 
 .mine-cell.random-selected {
-  border: 3px solid orange; /* Or any highlight you want */
+  border: 3px solid orange;
   background-color: rgba(255, 165, 0, 0.2);
   cursor: default;
 }

@@ -1,3 +1,13 @@
+type AutoPlayBalanceLimits = {
+  min: number;
+  max: number;
+};
+
+type AutoPlayBetStrategy = {
+  type: "same" | "increase" | "decrease";
+  percentage: number;
+};
+
 type GameStore = {
   game: Game;
   user: User;
@@ -33,4 +43,46 @@ type GameStore = {
   setBoxesToReveal: (count: number) => void;
   isAutoPlayEnabled: boolean;
   setIsAutoPlayEnabled: (value: boolean) => void;
+  autoPlayBalanceLimits: AutoPlayBalanceLimits;
+  setAutoPlayBalanceLimits: (min: number, max: number) => void;
+
+ autoPlayWinStrategy: BetStrategy;
+  autoPlayLoseStrategy: BetStrategy;
+  setAutoPlayWinStrategy: (strategy: BetStrategy) => void;
+  setAutoPlayLoseStrategy: (strategy: BetStrategy) => void;
+};
+
+
+// reusable ui types
+
+type CheckboxProps = {
+  id: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  disabled?: boolean;
+  className?: string;
+};
+
+
+
+type GridProps<T> = {
+  title: string;
+  items: T[];
+  maxCount?: number;
+  selectedItem: T | null;
+  onItemClick: (item: T) => void;
+  className?: string;
+};
+
+// strategy selector
+
+type StrategyType = "same" | "increase" | "decrease";
+
+type BetStrategySelectorProps = {
+  title: string;
+  strategy: StrategyType;
+  percentage: number;
+  onStrategyChange: (value: StrategyType) => void;
+  onPercentageChange: (value: number) => void;
 };

@@ -15,7 +15,10 @@ export const BetDropDown = ({
           <li key={idx}>
             <button
               style={{
-                backgroundColor: betValue === amount ? "#0864a4" : "#084494",
+                backgroundColor:
+                  betValue === amount
+                    ? "var(--bg-dark-blue-lighter)"
+                    : "var(--bg-dark-blue)",
               }}
               type="button"
               onClick={() => handleDropdownSelect(amount)}

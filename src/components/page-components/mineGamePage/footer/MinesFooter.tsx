@@ -25,6 +25,8 @@ export const MinesFooter = () => {
     multiplier,
     cashout,
     correctGuesses,
+    currentAutoRound,
+    autoPlayRounds,
     showInsufficientBalanceMessage,
     isAutoPlayEnabled,
     isAutoPlaying,
@@ -120,7 +122,11 @@ export const MinesFooter = () => {
         </div>
 
         <div className="change-price-container">
-          <button type="button" onClick={handleDecrementClick}>
+          <button
+            disabled={gameStarted}
+            type="button"
+            onClick={handleDecrementClick}
+          >
             <Image
               src="https://turbo.spribegaming.com/icon-minus.496f2e671ff32d15.svg"
               alt="minus icon"
@@ -129,6 +135,7 @@ export const MinesFooter = () => {
             />
           </button>
           <button
+            disabled={gameStarted}
             onClick={toggleBetDropdown}
             className="bet-dropdown-btn"
             id="bet-dropdown-btn"
@@ -141,7 +148,11 @@ export const MinesFooter = () => {
               height={12}
             />
           </button>
-          <button type="button" onClick={handleIncrementClick}>
+          <button
+            disabled={gameStarted}
+            type="button"
+            onClick={handleIncrementClick}
+          >
             <Image
               src="https://turbo.spribegaming.com/icon-plus.feaff32a610ebd64.svg"
               alt="plus icon"
@@ -181,12 +192,16 @@ export const MinesFooter = () => {
           }}
           className={`autoplay-btn ${isAutoPlaying ? "autoplay-active" : ""}`}
         >
-          <Image
-            src="https://turbo.spribegaming.com/icon-auto-play.4977be4170e6076b.svg"
-            alt="auto-play-icon"
-            width={18}
-            height={18}
-          />
+          {isAutoPlaying ? (
+            <p>{autoPlayRounds - currentAutoRound}</p>
+          ) : (
+            <Image
+              src="https://turbo.spribegaming.com/icon-auto-play.4977be4170e6076b.svg"
+              alt="auto-play-icon"
+              width={18}
+              height={18}
+            />
+          )}
         </button>
 
         {showAutoPlayOptions && (

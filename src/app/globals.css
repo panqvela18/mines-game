@@ -1,3 +1,42 @@
+:root {
+  /* Primary Colors */
+  --primary: #2e2691;
+
+  /* Secondary Colors */
+  --secondary: #f89414;
+
+  /* Accent Colors */
+  --accent-success: #61a503;
+  --accent-success-dark: #2d7500;
+  --accent-warning: #ffc404;
+  --accent-danger: #ff4d4f;
+  --accent-info: #0576dc;
+  --accent-info-dark: #025cd5;
+
+  /* Background Colors */
+  --bg-dark: #1e1e1e;
+  --bg-dark-blue: #084494;
+  --bg-dark-blue-light: #0267a5;
+  --bg-dark-blue-lighter: #0864a4;
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #212529;
+  --text-gray: #4b5563;
+
+  /* Game Specific */
+  --mine-cell: #0d2b52;
+  --mine-cell-shadow: #07203b;
+  --mine-dot: #3170ff;
+  --mine-dot-bg: #0b2b4b;
+
+  /* UI Elements */
+  --border-dark: rgba(0, 0, 0, 0.5);
+  --shadow-light: rgba(255, 255, 255, 0.2);
+  --shadow-dark: rgba(0, 0, 0, 0.3);
+  --modal-overlay: rgba(0, 0, 0, 0.6);
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -6,4 +45,16 @@
 
 img {
   user-select: none;
+}
+
+input {
+  outline: none;
+  border: none;
+}
+
+/* For Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

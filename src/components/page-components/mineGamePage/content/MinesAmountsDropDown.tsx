@@ -21,7 +21,10 @@ export const MinesAmountsDropDown = ({
           <li key={idx}>
             <button
               style={{
-                backgroundColor: minesCount === mines ? "#0864a4" : "#084494",
+                backgroundColor:
+                  minesCount === mines
+                    ? "var(--bg-dark-blue-lighter)"
+                    : "var(--bg-dark-blue)",
               }}
               key={mines}
               onClick={() => handleSelect(mines)}

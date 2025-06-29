@@ -6,9 +6,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white;
-  background-color: #0267a5;
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+  background-color: var(--bg-dark-blue-light);
+  border: 1px solid var(--border-dark);
   transition: opacity 0.15s ease-in-out, background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   padding: 2px 60px;
@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #084494;
+  background-color: var(--bg-dark-blue);
   border-radius: 10px;
 }
 
@@ -45,16 +45,16 @@
 
 .mines-amount-dropdown button {
   width: 100%;
-  background-color: #084494;
-  color: white;
+  background-color: var(--bg-dark-blue);
+  color: var(--text-primary);
   border: none;
   border-radius: 10px;
   cursor: pointer;
 }
 
 .x-btn {
-  background-color: #ffc404;
-  color: #084494;
+  background-color: var(--accent-warning);
+  color: var(--bg-dark-blue);
   font-size: 12px;
   border-radius: 20px;
   border: none;
@@ -66,7 +66,7 @@
 .mines-progress-bar {
   width: 100%;
   height: 4px;
-  background-color: #084494;
+  background-color: var(--bg-dark-blue);
   border-radius: 4px;
   margin-top: 8px;
   overflow: hidden;

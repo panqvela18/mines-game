@@ -1,5 +1,6 @@
 import { useGameStore } from "@/store/useGameStore";
 import "@/styles/minesGamePage/minesGrid.css";
+import { Cell } from "@/classes/Cell";
 
 export const MinesGrid = () => {
   const {
@@ -8,22 +9,21 @@ export const MinesGrid = () => {
     gameStarted,
     explodedCellIndex,
     showAllMines,
-
     randomSelectedBoxes = [],
   } = useGameStore();
 
-  const revealed = Array.from(game.getRevealedCells());
-  const minePositions = Array.from(game.getMinePositions?.() || []);
+  const cells: Cell[] = game.getCells();
 
   return (
     <div className="mines-grid">
-      {Array.from({ length: 25 }).map((_, index) => {
-        const isRevealed = revealed.includes(index);
+      {cells.map((cell) => {
+        const index = cell.index;
+        const isRevealed = cell.isRevealed();
+        const isMine = cell.hasMine();
         const isExploded = index === explodedCellIndex;
-        const isMine = minePositions.includes(index);
+        const isRandomSelected = randomSelectedBoxes.includes(index);
 
         const shouldReveal = isRevealed || showAllMines;
-        const isRandomSelected = randomSelectedBoxes.includes(index);
 
         return (
           <div

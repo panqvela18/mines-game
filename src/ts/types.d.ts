@@ -1,88 +1,116 @@
-type AutoPlayBalanceLimits = {
-  min: number;
-  max: number;
+ type AutoPlayStopAmount = {
+  increase: number | null;
+  decrease: number | null;
 };
 
-type AutoPlayBetStrategy = {
+ type BetStrategy = {
   type: "same" | "increase" | "decrease";
   percentage: number;
 };
 
-type GameStore = {
+ type AutoPlayBalanceLimits = {
+  min: number | null;
+  max: number | null;
+};
+
+ type GameStore = {
+  // Game state
   game: Game;
-  user: User;
-  minesCount: number;
-  betValue: number;
   gameStarted: boolean;
   explodedCellIndex: number | null;
   showAllMines: boolean;
   correctGuesses: number;
+  multiplier: number;
+  minesCount: number;
+
+  // User state
+  user: User;
+  betValue: number;
+  lastCashoutAmount: number;
+  showCashoutPopup: boolean;
+  showInsufficientBalanceMessage: boolean;
+
+  // Auto-play state
+  autoPlayRounds: number;
+  currentAutoRound: number;
+  isAutoPlaying: boolean;
+  boxesToReveal: number;
+  isAutoPlayEnabled: boolean;
+  randomSelectedBoxes: number[];
+  initialAutoPlayBalance: number;
+  autoPlayStopAmount: AutoPlayStopAmount;
+  autoPlaySingleWinLimit: number | null;
+  autoPlayWinStrategy: BetStrategy;
+  autoPlayLoseStrategy: BetStrategy;
+  autoPlayBalanceLimits: AutoPlayBalanceLimits;
+
+  // Game actions
   setCorrectGuesses: (count: number) => void;
   incrementCorrectGuesses: () => void;
   setMineCount: (count: number) => void;
   setBetValue: (value: number) => void;
   startGame: () => void;
   reveal: (index: number) => void;
-  multiplier: number;
   increaseMultiplier: () => void;
   resetMultiplier: () => void;
   cashout: () => void;
-  lastCashoutAmount: number;
-  showCashoutPopup: boolean;
-  showInsufficientBalanceMessage: boolean;
   setShowInsufficientBalanceMessage: (value: boolean) => void;
-  randomSelectedBoxes: number[];
   setRandomSelectedBoxes: (boxes: number[]) => void;
-  autoPlayRounds: number;
-  setAutoPlayRounds: (rounds: number) => void;
-  currentAutoRound: number;
-  startAutoPlay: () => void;
-  isAutoPlaying: boolean;
-  stopAutoPlay: () => void;
-  boxesToReveal: number;
-  setBoxesToReveal: (count: number) => void;
-  isAutoPlayEnabled: boolean;
-  setIsAutoPlayEnabled: (value: boolean) => void;
-  autoPlayBalanceLimits: AutoPlayBalanceLimits;
-  setAutoPlayBalanceLimits: (min: number, max: number) => void;
 
- autoPlayWinStrategy: BetStrategy;
-  autoPlayLoseStrategy: BetStrategy;
+  // Auto-play actions
+  setAutoPlayRounds: (rounds: number) => void;
+  startAutoPlay: () => Promise<void>;
+  stopAutoPlay: () => void;
+  setBoxesToReveal: (count: number) => void;
+  setIsAutoPlayEnabled: (value: boolean) => void;
+  setInitialAutoPlayBalance: (balance: number) => void;
+  setAutoPlayStopAmount: (increase: number | null, decrease: number | null) => void;
+  setAutoPlaySingleWinLimit: (value: number | null) => void;
   setAutoPlayWinStrategy: (strategy: BetStrategy) => void;
   setAutoPlayLoseStrategy: (strategy: BetStrategy) => void;
 };
 
-
-// reusable ui types
-
-type CheckboxProps = {
+// UI Component Types
+ type CheckboxProps = {
   id: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   disabled?: boolean;
   className?: string;
+  label?: string;
 };
 
-
-
-type GridProps<T> = {
+ type GridProps<T> = {
   title: string;
   items: T[];
   maxCount?: number;
   selectedItem: T | null;
   onItemClick: (item: T) => void;
   className?: string;
+  itemClassName?: string;
 };
 
-// strategy selector
+ type StrategyType = "same" | "increase" | "decrease";
 
-type StrategyType = "same" | "increase" | "decrease";
-
-type BetStrategySelectorProps = {
+ type BetStrategySelectorProps = {
   title: string;
   strategy: StrategyType;
   percentage: number;
   onStrategyChange: (value: StrategyType) => void;
   onPercentageChange: (value: number) => void;
+  className?: string;
+};
+
+ type BalanceLimitInputProps = {
+  id: string;
+  label: string;
+  value: number | null;
+  enabled: boolean;
+  onToggle: (checked: boolean) => void;
+  onChange: (value: number | null) => void;
+  className?: string;
+  min?: number;
+  max?: number;
+  step?: number;
 };

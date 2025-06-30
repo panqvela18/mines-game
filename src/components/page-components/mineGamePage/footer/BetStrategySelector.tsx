@@ -1,5 +1,5 @@
 import React from "react";
-
+import "@/styles/minesGamePage/betStrategy.css";
 const BetStrategySelector = ({
   title,
   strategy,

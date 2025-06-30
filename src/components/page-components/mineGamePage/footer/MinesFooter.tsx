@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import "@/styles/minesGamePage/minesFooter.css";
 import Image from "next/image";
 import { betAmounts } from "@/utils/constants";
@@ -33,8 +33,6 @@ export const MinesFooter = () => {
     stopAutoPlay,
   } = useGameStore();
 
-  const moneySoundRef = useRef<HTMLAudioElement | null>(null);
-
   const toggleBetDropdown = () => {
     if (isAutoPlaying) stopAutoPlay();
     setShowBetDropdown((prev) => !prev);
@@ -62,12 +60,6 @@ export const MinesFooter = () => {
 
   const handleCashoutClick = () => {
     cashout();
-    if (moneySoundRef.current) {
-      moneySoundRef.current.currentTime = 0;
-      moneySoundRef.current
-        .play()
-        .catch((err) => console.warn("Money sound failed:", err));
-    }
   };
 
   const handleBetClick = () => {
@@ -98,12 +90,6 @@ export const MinesFooter = () => {
 
   return (
     <div className="mines-game-footer">
-      <audio
-        ref={moneySoundRef}
-        preload="auto"
-        src="/mp3/cashier-quotka-chingquot-sound-effect-129698.mp3"
-      />
-
       <div className="change-bet-container">
         <div className="change-bet-input">
           <span>Bet USD</span>
@@ -114,11 +100,6 @@ export const MinesFooter = () => {
             value={betValue}
             onChange={handleInputChange}
           />
-          {showInsufficientBalanceMessage && (
-            <div className="bet-error-message">
-              Not enough balance to place bet
-            </div>
-          )}
         </div>
 
         <div className="change-price-container">
@@ -212,7 +193,10 @@ export const MinesFooter = () => {
           className={`${gameStarted ? "cashout-btn" : " bet-btn"}`}
           onClick={handleBetClick}
           disabled={gameStarted && correctGuesses === 0}
-          style={{ opacity: gameStarted && correctGuesses === 0 ? 0.5 : 1 }}
+          style={{
+            opacity: gameStarted && correctGuesses === 0 ? 0.5 : 1,
+            position: "relative",
+          }}
         >
           {!gameStarted && (
             <Image
@@ -235,6 +219,11 @@ export const MinesFooter = () => {
               "BET"
             )}
           </span>
+          {showInsufficientBalanceMessage && (
+            <div className="bet-error-message">
+              Not enough balance to place bet
+            </div>
+          )}
         </button>
       </div>
     </div>

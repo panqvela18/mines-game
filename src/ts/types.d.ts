@@ -1,19 +1,20 @@
- type AutoPlayStopAmount = {
+type AutoPlayStopAmount = {
   increase: number | null;
   decrease: number | null;
 };
 
- type BetStrategy = {
+type BetStrategy = {
   type: "same" | "increase" | "decrease";
   percentage: number;
 };
 
- type AutoPlayBalanceLimits = {
+type AutoPlayBalanceLimits = {
   min: number | null;
   max: number | null;
 };
+type BonusOption = "💥" | "2x" | "3x" | "5x" | "10x" | "20x" | "50x" | "100x";
 
- type GameStore = {
+type GameStore = {
   // Game state
   game: Game;
   gameStarted: boolean;
@@ -22,6 +23,7 @@
   correctGuesses: number;
   multiplier: number;
   minesCount: number;
+  isResettingRound: boolean;
 
   // User state
   user: User;
@@ -44,6 +46,14 @@
   autoPlayLoseStrategy: BetStrategy;
   autoPlayBalanceLimits: AutoPlayBalanceLimits;
 
+  // Bonus round state
+  showBonusModal: boolean;
+  bonusOptions: BonusOption[] | undefined;
+  bonusResult: BonusOption | null;
+  bonusRevealedOptions: BonusOption[];
+  bonusCashoutMultiplier: number;
+  bonusUserChoice: BonusOption | null;
+
   // Game actions
   setCorrectGuesses: (count: number) => void;
   incrementCorrectGuesses: () => void;
@@ -56,6 +66,7 @@
   cashout: () => void;
   setShowInsufficientBalanceMessage: (value: boolean) => void;
   setRandomSelectedBoxes: (boxes: number[]) => void;
+  setIsResettingRound: (value: boolean) => void;
 
   // Auto-play actions
   setAutoPlayRounds: (rounds: number) => void;
@@ -64,14 +75,25 @@
   setBoxesToReveal: (count: number) => void;
   setIsAutoPlayEnabled: (value: boolean) => void;
   setInitialAutoPlayBalance: (balance: number) => void;
-  setAutoPlayStopAmount: (increase: number | null, decrease: number | null) => void;
+  setAutoPlayStopAmount: (
+    increase: number | null,
+    decrease: number | null
+  ) => void;
   setAutoPlaySingleWinLimit: (value: number | null) => void;
   setAutoPlayWinStrategy: (strategy: BetStrategy) => void;
   setAutoPlayLoseStrategy: (strategy: BetStrategy) => void;
+
+  //Auto round actions
+  skipBonusRound: () => void;
+  triggerBonusRound: () => void;
+  resolveBonusRound: (choice: BonusOption) => void;
+  setBonusRevealedOptions: (options: BonusOption[]) => void;
+  setBonusCashoutMultiplier: (value: number) => void;
+  setBonusUserChoice: (choice: BonusOption | null) => void;
 };
 
 // UI Component Types
- type CheckboxProps = {
+type CheckboxProps = {
   id: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
@@ -81,7 +103,7 @@
   label?: string;
 };
 
- type GridProps<T> = {
+type GridProps<T> = {
   title: string;
   items: T[];
   maxCount?: number;
@@ -91,9 +113,9 @@
   itemClassName?: string;
 };
 
- type StrategyType = "same" | "increase" | "decrease";
+type StrategyType = "same" | "increase" | "decrease";
 
- type BetStrategySelectorProps = {
+type BetStrategySelectorProps = {
   title: string;
   strategy: StrategyType;
   percentage: number;
@@ -102,7 +124,7 @@
   className?: string;
 };
 
- type BalanceLimitInputProps = {
+type BalanceLimitInputProps = {
   id: string;
   label: string;
   value: number | null;

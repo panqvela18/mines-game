@@ -1,7 +1,10 @@
 "use client";
-import React, { useState } from "react";
-import "@/styles/minesGamePage/minesFooter.css";
+
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+
+import "@/styles/minesGamePage/minesFooter.css";
+
 import { betAmounts } from "@/utils/constants";
 import {
   parseBetValue,
@@ -9,14 +12,19 @@ import {
   incrementBetValue,
   decrementBetValue,
 } from "@/utils/betHelpers";
+
 import { BetDropDown } from "./BetDropDown";
-import { useGameStore } from "@/store/useGameStore";
 import { AutoPlayModal } from "./AutoPlayModal";
+import { useGameStore } from "@/store/useGameStore";
 
 export const MinesFooter = () => {
+  // Local UI state
   const [showBetDropdown, setShowBetDropdown] = useState(false);
   const [showAutoPlayOptions, setShowAutoPlayOptions] = useState(false);
 
+  const betDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Game state from store
   const {
     betValue,
     setBetValue,
@@ -31,8 +39,31 @@ export const MinesFooter = () => {
     isAutoPlayEnabled,
     isAutoPlaying,
     stopAutoPlay,
+    bonusCashoutMultiplier,
+    isResettingRound,
   } = useGameStore();
 
+  // Close dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        betDropdownRef.current &&
+        !betDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowBetDropdown(false);
+      }
+    };
+
+    if (showBetDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showBetDropdown]);
+
+  // Toggle handlers
   const toggleBetDropdown = () => {
     if (isAutoPlaying) stopAutoPlay();
     setShowBetDropdown((prev) => !prev);
@@ -42,8 +73,10 @@ export const MinesFooter = () => {
     setShowAutoPlayOptions((prev) => !prev);
   };
 
+  // Parsed bet for calculations
   const parsedBetValue = parseBetValue(betValue.toString());
 
+  // Handlers
   const handleDropdownSelect = (amount: number) => {
     setBetValue(amount);
     setShowBetDropdown(false);
@@ -54,18 +87,12 @@ export const MinesFooter = () => {
     setBetValue(parseFloat(sanitized) || 0);
   };
 
-  const handleStartClick = () => {
-    startGame();
-  };
+  const handleStartClick = () => startGame();
 
-  const handleCashoutClick = () => {
-    cashout();
-  };
+  const handleCashoutClick = () => cashout();
 
   const handleBetClick = () => {
-    if (isAutoPlaying) {
-      stopAutoPlay();
-    }
+    if (isAutoPlaying) stopAutoPlay();
 
     if (gameStarted && correctGuesses > 0) {
       handleCashoutClick();
@@ -88,17 +115,23 @@ export const MinesFooter = () => {
     );
   };
 
+  // Disable conditions for BET/CASHOUT button
+  const isBetButtonDisabled =
+    (gameStarted && correctGuesses === 0) || isResettingRound || betValue <= 0;
+
   return (
     <div className="mines-game-footer">
+      {/* Bet input & controls */}
       <div className="change-bet-container">
         <div className="change-bet-input">
           <span>Bet USD</span>
           <input
-            type="text"
+            type="number"
             name="bets"
             inputMode="decimal"
             value={betValue}
             onChange={handleInputChange}
+            min={0}
           />
         </div>
 
@@ -115,20 +148,21 @@ export const MinesFooter = () => {
               height={12}
             />
           </button>
+
           <button
             disabled={gameStarted}
             onClick={toggleBetDropdown}
             className="bet-dropdown-btn"
-            id="bet-dropdown-btn"
             type="button"
           >
             <Image
               src="https://turbo.spribegaming.com/icon-coin.35e2c2ac0b9fe1fa.svg"
-              alt="icon"
+              alt="coin icon"
               width={12}
               height={12}
             />
           </button>
+
           <button
             disabled={gameStarted}
             type="button"
@@ -143,18 +177,23 @@ export const MinesFooter = () => {
           </button>
         </div>
 
+        {/* Bet dropdown */}
         {showBetDropdown && (
-          <BetDropDown
-            betValue={betValue}
-            handleDropdownSelect={handleDropdownSelect}
-          />
+          <div ref={betDropdownRef}>
+            <BetDropDown
+              betValue={betValue}
+              handleDropdownSelect={handleDropdownSelect}
+            />
+          </div>
         )}
       </div>
 
+      {/* Footer buttons */}
       <div
         className="footer-btn-container"
         style={{ display: "flex", width: "100%" }}
       >
+        {/* AutoPlay button */}
         <button
           disabled={gameStarted || !isAutoPlayEnabled}
           onClick={() => {
@@ -185,16 +224,18 @@ export const MinesFooter = () => {
           )}
         </button>
 
+        {/* AutoPlay modal */}
         {showAutoPlayOptions && (
           <AutoPlayModal toggleAutoPlayOptions={toggleAutoPlayOptions} />
         )}
 
+        {/* Bet / Cashout button */}
         <button
-          className={`${gameStarted ? "cashout-btn" : " bet-btn"}`}
+          className={gameStarted ? "cashout-btn" : "bet-btn"}
           onClick={handleBetClick}
-          disabled={gameStarted && correctGuesses === 0}
+          disabled={isBetButtonDisabled}
           style={{
-            opacity: gameStarted && correctGuesses === 0 ? 0.5 : 1,
+            opacity: isBetButtonDisabled ? 0.5 : 1,
             position: "relative",
           }}
         >
@@ -212,13 +253,20 @@ export const MinesFooter = () => {
                 "CASHOUT"
               ) : (
                 <p className="cashout-p">
-                  CASHOUT <span>{(betValue * multiplier).toFixed(2)} USD</span>
+                  CASHOUT{" "}
+                  <span>
+                    {(betValue * multiplier * bonusCashoutMultiplier).toFixed(
+                      2
+                    )}{" "}
+                    USD
+                  </span>
                 </p>
               )
             ) : (
               "BET"
             )}
           </span>
+
           {showInsufficientBalanceMessage && (
             <div className="bet-error-message">
               Not enough balance to place bet

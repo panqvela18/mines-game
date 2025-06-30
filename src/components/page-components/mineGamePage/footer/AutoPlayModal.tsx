@@ -59,12 +59,8 @@ export const AutoPlayModal = ({
     setBoxesToReveal(randomCell);
     setAutoPlayRounds(rounds);
 
-    // Handle single win limit
     setAutoPlaySingleWinLimit(isSingleWinLimitEnabled ? singleWinLimit : null);
-
     setInitialAutoPlayBalance(user.getBalance());
-
-    // Handle stop amounts
     setAutoPlayStopAmount(
       isMaxBalanceEnabled ? maxBalance : null,
       isMinBalanceEnabled ? minBalance : null

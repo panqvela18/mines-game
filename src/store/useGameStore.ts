@@ -8,13 +8,14 @@ import {
 
 const coinSound = typeof Audio !== "undefined" ? new Audio("/mp3/coin-recieved-230517.mp3") : null;
 const explosionSound = typeof Audio !== "undefined" ? new Audio("/mp3/blast-37988.mp3") : null;
+const cashOutSound = typeof Audio !== "undefined" ? new Audio("/mp3/cashier-quotka-chingquot-sound-effect-129698.mp3") : null;
 
 type AutoPlayController = { shouldStop: boolean };
 let autoPlayController: AutoPlayController = { shouldStop: false };
 
 export const useGameStore = create<GameStore>((set, get) => ({
   game: new Game(25, 3),
-  user: new User(1000),
+  user: typeof window !== "undefined" ? new User() : new User(1000),
   minesCount: 3,
   betValue: 0.4,
   gameStarted: false,
@@ -73,6 +74,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
   randomSelectedBoxes: [],
   setRandomSelectedBoxes: (boxes) => set({ randomSelectedBoxes: boxes }),
 
+  initialAutoPlayBalance: 0,
+  setInitialAutoPlayBalance: (balance: number) =>
+    set({ initialAutoPlayBalance: balance }),
+  autoPlayStopAmount: { increase: Infinity, decrease: 0 },
+  setAutoPlayStopAmount: (increase: number, decrease: number) =>
+    set({ autoPlayStopAmount: { increase, decrease } }),
+
+  resetUserBalance: (value = 1000) => {
+    const user = get().user;
+    user.resetBalance(value);
+    set({ user });
+  },
+
   startGame: () => {
     const { user, betValue, minesCount, setShowInsufficientBalanceMessage } = get();
     if (!user.setBet(betValue)) {
@@ -86,7 +100,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameStarted: true,
       explodedCellIndex: null,
       showAllMines: false,
-      user: new User(user.getBalance()),
       multiplier: getInitialMultiplier(minesCount),
     });
   },
@@ -131,6 +144,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { user, multiplier, betValue, minesCount } = get();
     const cashoutAmount = betValue * multiplier;
     user.addBalance(cashoutAmount);
+    cashOutSound?.play();
 
     set({
       gameStarted: false,
@@ -183,10 +197,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       } = get();
 
       const currentBalance = user.getBalance();
+      const { initialAutoPlayBalance, autoPlayStopAmount } = get();
+      const profit = currentBalance - initialAutoPlayBalance;
+
       if (
         autoPlayController.shouldStop ||
-        (autoPlayBalanceLimits.min > 0 && currentBalance <= autoPlayBalanceLimits.min) ||
-        (autoPlayBalanceLimits.max !== Infinity && currentBalance >= autoPlayBalanceLimits.max) ||
+        profit >= autoPlayStopAmount.increase ||
+        -profit >= autoPlayStopAmount.decrease ||
         currentBalance < betValue
       ) {
         stopAutoPlay();

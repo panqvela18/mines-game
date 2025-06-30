@@ -1,15 +1,7 @@
 "use client";
 import React from "react";
 import Checkbox from "@/components/ui/Checkbox";
-
-type BalanceLimitInputProps = {
-  id: string;
-  label: string;
-  value: number;
-  enabled: boolean;
-  onToggle: (checked: boolean) => void;
-  onChange: (value: number) => void;
-};
+import "@/styles/minesGamePage/balanceLimits.css";
 
 const BalanceLimitInput = ({
   id,

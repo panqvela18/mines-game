@@ -46,6 +46,12 @@ type GameStore = {
   autoPlayBalanceLimits: AutoPlayBalanceLimits;
   setAutoPlayBalanceLimits: (min: number, max: number) => void;
 
+  initialAutoPlayBalance: number;
+setInitialAutoPlayBalance: (balance: number) => void;
+autoPlayStopAmount: { increase: number; decrease: number };
+setAutoPlayStopAmount: (increase: number, decrease: number) => void;
+
+
  autoPlayWinStrategy: BetStrategy;
   autoPlayLoseStrategy: BetStrategy;
   setAutoPlayWinStrategy: (strategy: BetStrategy) => void;
@@ -75,7 +81,7 @@ type GridProps<T> = {
   className?: string;
 };
 
-// strategy selector
+// strategy selector && balancelimit
 
 type StrategyType = "same" | "increase" | "decrease";
 
@@ -85,4 +91,14 @@ type BetStrategySelectorProps = {
   percentage: number;
   onStrategyChange: (value: StrategyType) => void;
   onPercentageChange: (value: number) => void;
+};
+
+
+type BalanceLimitInputProps = {
+  id: string;
+  label: string;
+  value: number;
+  enabled: boolean;
+  onToggle: (checked: boolean) => void;
+  onChange: (value: number) => void;
 };

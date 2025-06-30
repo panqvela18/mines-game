@@ -48,16 +48,23 @@ export const AutoPlayModal = ({
     startAutoPlay,
     minesCount,
     setAutoPlayBalanceLimits,
+    setInitialAutoPlayBalance,
+    setAutoPlayStopAmount,
     setAutoPlayLoseStrategy,
     setAutoPlayWinStrategy,
+    user,
   } = useGameStore();
 
   const handleAutoPlayStart = () => {
-    const finalMinBalance = isMinBalanceEnabled ? minBalance : 0;
-    const finalMaxBalance = isMaxBalanceEnabled ? maxBalance : Infinity;
     setBoxesToReveal(randomCell);
     setAutoPlayRounds(rounds);
-    setAutoPlayBalanceLimits(finalMinBalance, finalMaxBalance);
+
+    setInitialAutoPlayBalance(user.getBalance());
+    setAutoPlayStopAmount(
+      isMaxBalanceEnabled ? maxBalance : Infinity,
+      isMinBalanceEnabled ? minBalance : 0
+    );
+
     startAutoPlay();
   };
 

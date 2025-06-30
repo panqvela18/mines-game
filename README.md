@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mines Game
 
-## Getting Started
+A classic Minesweeper-style game built with **Next.js**, **Zustand** for state management, and styled with pure CSS.
 
-First, run the development server:
+---
 
-```bash
+## About
+
+Mines Game is a web-based game where players try to reveal safe cells without triggering mines.  
+This project uses the React-based **Next.js** framework for server-side rendering and routing,  
+**Zustand** for lightweight and simple state management, and pure CSS for styling without any additional frameworks.
+
+---
+
+## Features
+
+- Interactive grid with clickable cells  
+- Mine detection and game-over handling  
+- **Autoplay** mode to automatically play multiple rounds  
+- **Balance limitation** feature to control betting amount limits  
+- **Betting strategy** options to customize betting behavior  
+- **Big bonus round** triggered after every 3 rounds to increase winnings  
+- State persistence across game sessions  
+- Responsive layout for all screen sizes  
+
+---
+
+## Technologies
+
+- **Next.js** – React framework for building web applications  
+- **Zustand** – Lightweight state management library  
+- **CSS** – Pure CSS for styling without dependencies  
+
+---
+
+## Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/yourusername/mines-game.git
+   cd mines-game
+2. Install dependencies:
+
+npm install
+# or
+yarn install
+
+3. Run the development server:
+
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open http://localhost:3000 in your browser to play the game.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
+- Click on cells to reveal safe spots.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Avoid clicking on mines to prevent game over.
 
-## Learn More
+- Use the UI controls to restart or change game settings.
 
-To learn more about Next.js, take a look at the following resources:
+- Enable Autoplay to automatically play multiple rounds based on your betting strategy and balance limits.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Watch for the Big Bonus Round every 3 rounds for a chance to win bigger rewards.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## State Management
+The game state — including the grid data, mine positions, betting amounts, autoplay settings, and bonus round triggers —
+is managed with Zustand for efficient and simple global state handling.
 
-## Deploy on Vercel
+## Styling
+All styles are written in pure CSS. Stylesheets are located in the /styles folder and imported directly into components or pages.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   

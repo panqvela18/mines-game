@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import "@/styles/minesGamePage/minesFooter.css";
 import Image from "next/image";
 import { betAmounts } from "@/utils/constants";

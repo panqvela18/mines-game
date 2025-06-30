@@ -13,6 +13,7 @@ const cashOutSound = typeof Audio !== "undefined" ? new Audio("/mp3/cashier-quot
 type AutoPlayController = { shouldStop: boolean };
 let autoPlayController: AutoPlayController = { shouldStop: false };
 
+
 export const useGameStore = create<GameStore>((set, get) => ({
   game: new Game(25, 3),
   user: typeof window !== "undefined" ? new User() : new User(1000),
@@ -23,63 +24,78 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showAllMines: false,
   correctGuesses: 0,
   boxesToReveal: 3,
-
-  autoPlayBalanceLimits: { min: 0, max: Infinity },
-  setAutoPlayBalanceLimits: (min, max) =>
-    set({ autoPlayBalanceLimits: { min, max } }),
-
+  autoPlayRounds: 0,
+  currentAutoRound: 0,
+  isAutoPlaying: false,
+  isAutoPlayEnabled: false,
+  multiplier: getInitialMultiplier(3),
+  showInsufficientBalanceMessage: false,
+  showCashoutPopup: false,
+  lastCashoutAmount: 0,
+  randomSelectedBoxes: [],
+  initialAutoPlayBalance: 0,
+  autoPlayBalanceLimits: { min: null, max: null },
+  autoPlayStopAmount: { increase: null, decrease: null },
+  autoPlaySingleWinLimit: null,
   autoPlayWinStrategy: { type: "same", percentage: 0 },
   autoPlayLoseStrategy: { type: "same", percentage: 0 },
 
+  // Actions
+  setAutoPlayBalanceLimits: (min: number, max: number) =>
+    set({ autoPlayBalanceLimits: { min, max } }),
+
   setAutoPlayWinStrategy: (strategy) =>
     set({ autoPlayWinStrategy: strategy }),
+
   setAutoPlayLoseStrategy: (strategy) =>
     set({ autoPlayLoseStrategy: strategy }),
 
   setBoxesToReveal: (count) =>
     set({ boxesToReveal: Math.max(1, Math.min(24, count)) }),
+
   setBetValue: (value) => set({ betValue: value }),
 
-  autoPlayRounds: 0,
   setAutoPlayRounds: (rounds) => set({ autoPlayRounds: rounds }),
-  currentAutoRound: 0,
-  isAutoPlaying: false,
-  isAutoPlayEnabled: false,
+
   setIsAutoPlayEnabled: (value) => set({ isAutoPlayEnabled: value }),
 
-  multiplier: getInitialMultiplier(3),
   increaseMultiplier: () => {
     const { multiplier, minesCount } = get();
     const increaseRate = getMultiplierIncrease(minesCount);
     set({ multiplier: multiplier * (1 + increaseRate) });
   },
+
   resetMultiplier: () => {
     const { minesCount } = get();
     set({ multiplier: getInitialMultiplier(minesCount) });
   },
 
   setCorrectGuesses: (count) => set({ correctGuesses: count }),
+
   incrementCorrectGuesses: () =>
     set((state) => ({ correctGuesses: state.correctGuesses + 1 })),
+
   setMineCount: (count) =>
     set({ minesCount: count, multiplier: getInitialMultiplier(count) }),
 
-  showInsufficientBalanceMessage: false,
   setShowInsufficientBalanceMessage: (value) =>
     set({ showInsufficientBalanceMessage: value }),
 
-  showCashoutPopup: false,
-  lastCashoutAmount: 0,
-
-  randomSelectedBoxes: [],
   setRandomSelectedBoxes: (boxes) => set({ randomSelectedBoxes: boxes }),
 
-  initialAutoPlayBalance: 0,
-  setInitialAutoPlayBalance: (balance: number) =>
+  setInitialAutoPlayBalance: (balance) =>
     set({ initialAutoPlayBalance: balance }),
-  autoPlayStopAmount: { increase: Infinity, decrease: 0 },
-  setAutoPlayStopAmount: (increase: number, decrease: number) =>
-    set({ autoPlayStopAmount: { increase, decrease } }),
+
+  setAutoPlayStopAmount: (increase, decrease) =>
+    set({
+      autoPlayStopAmount: {
+        increase: increase !== null ? increase : null,
+        decrease: decrease !== null ? decrease : null,
+      },
+    }),
+
+  setAutoPlaySingleWinLimit: (value) =>
+    set({ autoPlaySingleWinLimit: value !== null ? value : null }),
 
   resetUserBalance: (value = 1000) => {
     const user = get().user;
@@ -141,10 +157,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   cashout: () => {
-    const { user, multiplier, betValue, minesCount } = get();
+    const { user, multiplier, betValue, minesCount, autoPlaySingleWinLimit } = get();
     const cashoutAmount = betValue * multiplier;
     user.addBalance(cashoutAmount);
     cashOutSound?.play();
+
+    if (autoPlaySingleWinLimit !== null && cashoutAmount >= autoPlaySingleWinLimit) {
+      get().stopAutoPlay();
+      return;
+    }
 
     set({
       gameStarted: false,
@@ -169,14 +190,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   stopAutoPlay: () => {
-    autoPlayController.shouldStop = true;
-    set({
-      isAutoPlaying: false,
-      autoPlayRounds: 0,
-      currentAutoRound: 0,
-      gameStarted: false,
-    });
-  },
+  autoPlayController.shouldStop = true;
+  const { minesCount } = get();
+  set({
+    isAutoPlaying: false,
+    autoPlayRounds: 0,
+    currentAutoRound: 0,
+    gameStarted: false,
+    explodedCellIndex: null,
+    showAllMines: false,
+    correctGuesses: 0,
+    multiplier: getInitialMultiplier(minesCount),
+    game: new Game(25, minesCount),
+    randomSelectedBoxes: [],
+  });
+},
 
   startAutoPlay: async () => {
     const { autoPlayRounds, boxesToReveal, isAutoPlaying, stopAutoPlay } = get();
@@ -189,21 +217,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const {
         user,
         betValue,
-        autoPlayBalanceLimits,
         minesCount,
         autoPlayLoseStrategy,
         autoPlayWinStrategy,
         setBetValue,
+        autoPlayStopAmount,
+        initialAutoPlayBalance,
       } = get();
 
       const currentBalance = user.getBalance();
-      const { initialAutoPlayBalance, autoPlayStopAmount } = get();
       const profit = currentBalance - initialAutoPlayBalance;
+
+      const shouldStopDueToIncrease =
+        autoPlayStopAmount.increase !== null &&
+        profit >= autoPlayStopAmount.increase;
+      const shouldStopDueToDecrease =
+        autoPlayStopAmount.decrease !== null &&
+        -profit >= autoPlayStopAmount.decrease;
 
       if (
         autoPlayController.shouldStop ||
-        profit >= autoPlayStopAmount.increase ||
-        -profit >= autoPlayStopAmount.decrease ||
+        shouldStopDueToIncrease ||
+        shouldStopDueToDecrease ||
         currentBalance < betValue
       ) {
         stopAutoPlay();
@@ -226,7 +261,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (!get().gameStarted) continue;
 
       await new Promise((r) => setTimeout(r, 600));
-      const selected = [...Array(25).keys()].sort(() => 0.5 - Math.random()).slice(0, boxesToReveal);
+      const selected = [...Array(25).keys()]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, boxesToReveal);
       set({ randomSelectedBoxes: selected });
 
       await new Promise((r) => setTimeout(r, 100));

@@ -32,4 +32,7 @@ export class User {
     this.balance = value;
     this.saveBalance();
   }
+   lose() {
+    // nothing to do here for now
+  }
 }

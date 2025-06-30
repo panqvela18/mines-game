@@ -10,7 +10,14 @@ const BalanceLimitInput = ({
   enabled,
   onToggle,
   onChange,
-}: BalanceLimitInputProps) => {
+}: {
+  id: string;
+  label: string;
+  value: number | null;
+  enabled: boolean;
+  onToggle: (checked: boolean) => void;
+  onChange: (value: number | null) => void;
+}) => {
   return (
     <div
       className="balance-wrapper"
@@ -23,23 +30,21 @@ const BalanceLimitInput = ({
         checked={enabled}
         onChange={(checked) => {
           onToggle(checked);
-          if (!checked) onChange(id.includes("min") ? 0 : Infinity);
+          if (!checked) onChange(null);
         }}
       />
       <label>{label}</label>
       <input
         type="number"
         disabled={!enabled}
-        value={enabled ? (value === Infinity ? "" : value) : ""}
+        value={enabled && value !== null ? value : ""}
         onChange={(e) => {
           let val = e.target.value;
           if (val.length > 1 && val.startsWith("0") && !val.startsWith("0.")) {
             val = val.substring(1);
           }
           const numValue = parseFloat(val);
-          onChange(
-            isNaN(numValue) ? (id.includes("min") ? 0 : Infinity) : numValue
-          );
+          onChange(isNaN(numValue) ? null : numValue);
         }}
         onKeyDown={(e) => {
           if (e.key === "0" && e.currentTarget.value === "") {

@@ -1,49 +1,63 @@
+import { Cell } from "./Cell";
+
 export class Game {
-  public mineCount: number;
   private gridSize: number;
-  private minePositions: Set<number>;
-  private revealedCells: Set<number>;
+  public mineCount: number;
+  private cells: Cell[];
 
   constructor(gridSize = 25, mineCount = 5) {
     this.gridSize = gridSize;
     this.mineCount = mineCount;
-    this.minePositions = this.generateMines();
-    this.revealedCells = new Set();
+    this.cells = this.generateCells();
   }
 
-  private generateMines(): Set<number> {
-    const positions = new Set<number>();
-    while (positions.size < this.mineCount) {
+  private generateCells(): Cell[] {
+    const cells = Array.from({ length: this.gridSize }, (_, index) => new Cell(index));
+    let minesPlaced = 0;
+
+    while (minesPlaced < this.mineCount) {
       const rand = Math.floor(Math.random() * this.gridSize);
-      positions.add(rand);
+      if (!cells[rand].hasMine()) {
+        cells[rand].setMine();
+        minesPlaced++;
+      }
     }
-    return positions;
+
+    return cells;
   }
 
   revealCell(index: number): "mine" | "safe" {
-    if (this.revealedCells.has(index)) return "safe";
-    this.revealedCells.add(index);
-    return this.minePositions.has(index) ? "mine" : "safe";
+    if (this.cells[index].isRevealed()) return "safe";
+    return this.cells[index].reveal();
   }
 
   isGameOver(): boolean {
-    for (const index of this.revealedCells) {
-      if (this.minePositions.has(index)) return true;
-    }
-    return false;
+    return this.cells.some((cell) => cell.isRevealed() && cell.hasMine());
   }
 
-  getRevealedCells(): Set<number> {
-    return this.revealedCells;
+  getRevealedCells(): number[] {
+    return this.cells.filter((c) => c.isRevealed()).map((c) => c.index);
   }
 
-  getMinePositions(): Set<number> {
-    return this.minePositions;
+  getMinePositions(): number[] {
+    return this.cells.filter((c) => c.hasMine()).map((c) => c.index);
+  }
+
+  getCells(): Cell[] {
+    return this.cells;
   }
 
   reset(mineCount: number): void {
     this.mineCount = mineCount;
-    this.minePositions = this.generateMines();
-    this.revealedCells.clear();
+    this.cells.forEach((cell) => cell.reset());
+
+    let minesPlaced = 0;
+    while (minesPlaced < this.mineCount) {
+      const rand = Math.floor(Math.random() * this.gridSize);
+      if (!this.cells[rand].hasMine()) {
+        this.cells[rand].setMine();
+        minesPlaced++;
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import "@/styles/minesGamePage/minesHeader.css";
 import { HowToPlayModal } from "./HowToPlayModal";
@@ -7,11 +7,15 @@ import { DropDownGames } from "./DropDownGames";
 import { useGameStore } from "@/store/useGameStore";
 
 export const MinesHeader = () => {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [showHowToPlay, setShowHowToPlay] = useState<boolean>(false);
+  const [isClient, setIsClient] = useState<boolean>(false);
   const { user, lastCashoutAmount, showCashoutPopup, isAutoPlaying } =
     useGameStore();
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
     setShowHowToPlay(false);
@@ -72,7 +76,7 @@ export const MinesHeader = () => {
               + {lastCashoutAmount.toFixed(2)} USD
             </div>
           )}
-          <p>{user.getBalance().toFixed(2)}</p>
+          {isClient && <p>{user.getBalance().toFixed(2)}</p>}
           <span>USD</span>
         </div>
         <button className="minesGame-burger-menu-btn">

@@ -206,10 +206,29 @@
 
 .bet-error-message {
   position: absolute;
+  bottom: 100%;
+  left: 0;
+  transform: translateY(-8px);
+  background-color: #fff;
   color: var(--accent-danger);
+  border: 1px solid var(--accent-danger);
+  padding: 6px 10px;
+  border-radius: 6px;
   font-size: 14px;
-  margin-top: 6px;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   animation: fadeOut 1s forwards;
+}
+
+.bet-error-message::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 10px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--accent-danger) transparent transparent transparent;
 }
 
 @keyframes fadeOut {

@@ -24,6 +24,7 @@ type GameStore = {
   multiplier: number;
   minesCount: number;
   isResettingRound: boolean;
+   isSoundOn: boolean;
 
   // User state
   user: User;
@@ -68,6 +69,8 @@ type GameStore = {
   setShowInsufficientBalanceMessage: (value: boolean) => void;
   setRandomSelectedBoxes: (boxes: number[]) => void;
   setIsResettingRound: (value: boolean) => void;
+    setIsSoundOn: (value: boolean) => void;
+
 
   // Auto-play actions
   setAutoPlayRounds: (rounds: number) => void;

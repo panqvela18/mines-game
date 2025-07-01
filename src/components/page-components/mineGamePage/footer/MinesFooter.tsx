@@ -253,11 +253,11 @@ export const MinesFooter = () => {
                 "CASHOUT"
               ) : (
                 <p className="cashout-p">
-                  CASHOUT{" "}
+                  CASHOUT
                   <span>
                     {(betValue * multiplier * bonusCashoutMultiplier).toFixed(
                       2
-                    )}{" "}
+                    )}
                     USD
                   </span>
                 </p>

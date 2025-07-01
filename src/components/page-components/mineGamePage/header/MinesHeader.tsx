@@ -2,13 +2,16 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import "@/styles/minesGamePage/minesHeader.css";
-import { HowToPlayModal } from "./HowToPlayModal";
+import { HowToPlay } from "./HowToPlay";
 import { DropDownGames } from "./DropDownGames";
 import { useGameStore } from "@/store/useGameStore";
+import { ReusableModal } from "@/components/ui/ReusableModal";
+import { BonusRound } from "./BonusRound";
 
 export const MinesHeader = () => {
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const [showHowToPlay, setShowHowToPlay] = useState<boolean>(false);
+  const [showBonusModal, setShowBonusModal] = useState<boolean>(false);
   const [isClient, setIsClient] = useState<boolean>(false);
   const { user, lastCashoutAmount, showCashoutPopup, isAutoPlaying } =
     useGameStore();
@@ -19,13 +22,20 @@ export const MinesHeader = () => {
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
     setShowHowToPlay(false);
+    setShowBonusModal(false);
   };
 
   const toggleHowToPlay = () => {
     setShowHowToPlay((prev) => !prev);
     setShowDropdown(false);
+    setShowBonusModal(false);
   };
 
+  const toggleBonus = () => {
+    setShowBonusModal((prev) => !prev);
+    setShowDropdown(false);
+    setShowHowToPlay(false);
+  };
   return (
     <div className="minesGame-header">
       <div className="minesGame-header-left">
@@ -44,7 +54,11 @@ export const MinesHeader = () => {
           />
         </button>
 
-        {showHowToPlay && <HowToPlayModal toggleHowToPlay={toggleHowToPlay} />}
+        {showHowToPlay && (
+          <ReusableModal title="How to play" toggle={toggleHowToPlay}>
+            <HowToPlay />
+          </ReusableModal>
+        )}
 
         <button className="how-to-play-btn" onClick={toggleHowToPlay}>
           <span>
@@ -65,7 +79,14 @@ export const MinesHeader = () => {
           </span>
           <p> How to play?</p>
         </button>
-
+        <button onClick={toggleBonus} className="bonus-btn">
+          🎁
+        </button>
+        {showBonusModal && (
+          <ReusableModal title="What is bonus round?" toggle={toggleBonus}>
+            <BonusRound />
+          </ReusableModal>
+        )}
         <div className="fun-mode">FUN MODE</div>
       </div>
 

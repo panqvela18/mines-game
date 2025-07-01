@@ -17,6 +17,7 @@ export const AutoPlayModal = ({
   const [minBalance, setMinBalance] = useState<number | null>(null);
   const [maxBalance, setMaxBalance] = useState<number | null>(null);
   const [singleWinLimit, setSingleWinLimit] = useState<number | null>(null);
+  const [skipBonusRound, setSkipBonusRound] = useState(false);
 
   const [isMinBalanceEnabled, setIsMinBalanceEnabled] = useState(false);
   const [isMaxBalanceEnabled, setIsMaxBalanceEnabled] = useState(false);
@@ -44,6 +45,7 @@ export const AutoPlayModal = ({
     setInitialAutoPlayBalance,
     setAutoPlayLoseStrategy,
     setAutoPlayWinStrategy,
+    setSkipBonusRoundDuringAutoPlay,
     user,
   } = useGameStore();
 
@@ -59,12 +61,10 @@ export const AutoPlayModal = ({
     setBoxesToReveal(randomCell);
     setAutoPlayRounds(rounds);
 
-    // Handle single win limit
+    setSkipBonusRoundDuringAutoPlay(skipBonusRound);
+
     setAutoPlaySingleWinLimit(isSingleWinLimitEnabled ? singleWinLimit : null);
-
     setInitialAutoPlayBalance(user.getBalance());
-
-    // Handle stop amounts
     setAutoPlayStopAmount(
       isMaxBalanceEnabled ? maxBalance : null,
       isMinBalanceEnabled ? minBalance : null
@@ -97,6 +97,17 @@ export const AutoPlayModal = ({
           onItemClick={setRandomCell}
           className="random-grid-container"
         />
+        <label className="skip-input-cont">
+          <input
+            checked={skipBonusRound}
+            onChange={() => setSkipBonusRound((prev) => !prev)}
+            type="checkbox"
+            name="bonus"
+            id="bonus"
+            className="skip-checkbox"
+          />
+          Skip Bonus Rounds during Autoplay
+        </label>
 
         <div className="balance-limits-container">
           <h4 className="round-title">Balance limitations</h4>

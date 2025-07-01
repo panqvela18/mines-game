@@ -24,11 +24,7 @@ export default function Home() {
   return (
     <main className="main-page-container">
       <h1 className="main-title">mines</h1>
-      <Image
-        style={{ borderRadius: "20px" }}
-        src={minesGameImg}
-        alt="minesGame"
-      />
+      <Image src={minesGameImg} alt="minesGame" className="main-page-img" />
       <button onClick={handlePlayClick} className="play-btn">
         Play Demo
       </button>

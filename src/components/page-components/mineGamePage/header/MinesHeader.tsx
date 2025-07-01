@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import "@/styles/minesGamePage/minesHeader.css";
 import { HowToPlay } from "./HowToPlay";
@@ -7,18 +7,43 @@ import { DropDownGames } from "./DropDownGames";
 import { useGameStore } from "@/store/useGameStore";
 import { ReusableModal } from "@/components/ui/ReusableModal";
 import { BonusRound } from "./BonusRound";
+import { BurgerMenu } from "./BurgerMenu";
 
 export const MinesHeader = () => {
-  const [showDropdown, setShowDropdown] = useState<boolean>(false);
-  const [showHowToPlay, setShowHowToPlay] = useState<boolean>(false);
-  const [showBonusModal, setShowBonusModal] = useState<boolean>(false);
-  const [isClient, setIsClient] = useState<boolean>(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [showBonusModal, setShowBonusModal] = useState(false);
+  const [showBurgerMenu, setShowBurgerMenu] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const { user, lastCashoutAmount, showCashoutPopup, isAutoPlaying } =
     useGameStore();
+
+  const burgerMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Close BurgerMenu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        burgerMenuRef.current &&
+        !burgerMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowBurgerMenu(false);
+      }
+    };
+
+    if (showBurgerMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showBurgerMenu]);
+
   const toggleDropdown = () => {
     setShowDropdown((prev) => !prev);
     setShowHowToPlay(false);
@@ -36,6 +61,12 @@ export const MinesHeader = () => {
     setShowDropdown(false);
     setShowHowToPlay(false);
   };
+
+  const toggleBurgerMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation(); // ⛔ prevent triggering the document click handler
+    setShowBurgerMenu((prev) => !prev);
+  };
+
   return (
     <div className="minesGame-header">
       <div className="minesGame-header-left">
@@ -100,14 +131,35 @@ export const MinesHeader = () => {
           {isClient && <p>{user.getBalance().toFixed(2)}</p>}
           <span>USD</span>
         </div>
-        <button className="minesGame-burger-menu-btn">
-          <Image
-            src="https://turbo.spribegaming.com/icon-burger-menu.d11de584b7113bad.svg"
-            alt="burger"
-            width={10}
-            height={10}
-          />
-        </button>
+
+        {showBurgerMenu ? (
+          <div ref={burgerMenuRef}>
+            <button
+              onClick={toggleBurgerMenu}
+              className="minesGame-burger-menu-btn"
+            >
+              <Image
+                src="https://turbo.spribegaming.com/icon-burger-menu.d11de584b7113bad.svg"
+                alt="burger"
+                width={10}
+                height={10}
+              />
+            </button>
+            <BurgerMenu />
+          </div>
+        ) : (
+          <button
+            onClick={toggleBurgerMenu}
+            className="minesGame-burger-menu-btn"
+          >
+            <Image
+              src="https://turbo.spribegaming.com/icon-burger-menu.d11de584b7113bad.svg"
+              alt="burger"
+              width={10}
+              height={10}
+            />
+          </button>
+        )}
       </div>
 
       {showDropdown && <DropDownGames />}

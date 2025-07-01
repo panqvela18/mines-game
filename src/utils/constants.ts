@@ -13,6 +13,15 @@ export const games:Games[]=[
 ]
 
 
+export const burgerMenuOptions:BurgerMenuOptions[] =[
+    {id:1,nav:"Free Bets",iconImgUrl:"https://turbo.spribegaming.com/icon-star.a48e3d708fd7461a.svg"},
+    {id:2,nav:"Bet History",iconImgUrl:"https://turbo.spribegaming.com/icon-history.1160649dfd98e356.svg"},
+    {id:3,nav:"Game Limits",iconImgUrl:"https://turbo.spribegaming.com/icon-limits.aecaaf432c75a1ec.svg"},
+    {id:4,nav:"How To Play",iconImgUrl:"https://turbo.spribegaming.com/assets/icons/icon-question.svg"},
+    {id:5,nav:"Game Rules",iconImgUrl:"https://turbo.spribegaming.com/icon-rules.99256ac755bf5a7a.svg"},
+    {id:6,nav:"Provably Fair Settings,",iconImgUrl:"https://turbo.spribegaming.com/icon-scales.e5f683a0b77fd0f1.svg"},
+]
+
 export const betAmounts:number[] = [
     0.10, 
     0.20, 

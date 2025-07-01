@@ -47,6 +47,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   bonusRevealedOptions: [] as BonusOption[],
   bonusCashoutMultiplier: 1,
   bonusUserChoice: null,
+  skipBonusRoundDuringAutoPlay: false,
+setSkipBonusRoundDuringAutoPlay: (value: boolean) => set({ skipBonusRoundDuringAutoPlay: value }),
+
 
 setBonusCashoutMultiplier: (value: number) => set({ bonusCashoutMultiplier: value }),
 setBonusUserChoice: (choice: BonusOption | null) => set({ bonusUserChoice: choice }),
@@ -312,8 +315,16 @@ skipBonusRound: () => {
     });
   },
 
- startAutoPlay: async () => {
-  const { autoPlayRounds, boxesToReveal, isAutoPlaying, stopAutoPlay, resolveBonusRound } = get();
+startAutoPlay: async () => {
+  const {
+    autoPlayRounds,
+    boxesToReveal,
+    isAutoPlaying,
+    stopAutoPlay,
+    resolveBonusRound,
+    skipBonusRoundDuringAutoPlay,
+  } = get();
+
   if (isAutoPlaying || autoPlayRounds <= 0) return;
 
   autoPlayController = { shouldStop: false };
@@ -384,11 +395,16 @@ skipBonusRound: () => {
       await new Promise((r) => setTimeout(r, 800));
 
       while (get().showBonusModal) {
-        await new Promise((r) => setTimeout(r, 500));
-        const { bonusOptions } = get();
-        if ((bonusOptions ?? []).length > 0) {
-          const randomChoice = (bonusOptions ?? [])[Math.floor(Math.random() * (bonusOptions ?? []).length)];
-          await resolveBonusRound(randomChoice);
+        if (skipBonusRoundDuringAutoPlay) {
+          get().skipBonusRound();  // immediately skip bonus round modal
+        } else {
+          await new Promise((r) => setTimeout(r, 500));
+          const { bonusOptions } = get();
+          if ((bonusOptions ?? []).length > 0) {
+            const randomChoice =
+              (bonusOptions ?? [])[Math.floor(Math.random() * (bonusOptions ?? []).length)];
+            await resolveBonusRound(randomChoice);
+          }
         }
       }
 

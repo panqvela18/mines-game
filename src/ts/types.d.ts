@@ -53,6 +53,7 @@ type GameStore = {
   bonusRevealedOptions: BonusOption[];
   bonusCashoutMultiplier: number;
   bonusUserChoice: BonusOption | null;
+    skipBonusRoundDuringAutoPlay: boolean;
 
   // Game actions
   setCorrectGuesses: (count: number) => void;
@@ -90,6 +91,8 @@ type GameStore = {
   setBonusRevealedOptions: (options: BonusOption[]) => void;
   setBonusCashoutMultiplier: (value: number) => void;
   setBonusUserChoice: (choice: BonusOption | null) => void;
+    setSkipBonusRoundDuringAutoPlay: (value: boolean) => void;
+
 };
 
 // UI Component Types

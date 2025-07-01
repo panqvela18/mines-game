@@ -5,7 +5,7 @@ import { useGameStore } from "@/store/useGameStore";
 
 export const ContentHeader = () => {
   const [showMinesDropDown, setShowMinesDropDown] = useState(false);
-  const { minesCount, correctGuesses, multiplier, isAutoPlaying } =
+  const { minesCount, correctGuesses, multiplier, isAutoPlaying, gameStarted } =
     useGameStore();
 
   const safeCellsCount = 25 - minesCount;
@@ -38,7 +38,7 @@ export const ContentHeader = () => {
     <>
       <div className="select-mines-cont" ref={dropdownRef}>
         <button
-          disabled={isAutoPlaying}
+          disabled={isAutoPlaying || gameStarted}
           className="select-mines-amounts-btn"
           onClick={toggleMinesDropDown}
         >

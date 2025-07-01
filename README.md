@@ -29,7 +29,9 @@ This project uses the React-based **Next.js** framework for server-side renderin
 
 - **Next.js** – React framework for building web applications  
 - **Zustand** – Lightweight state management library  
-- **CSS** – Pure CSS for styling without dependencies  
+- **CSS** – Pure CSS for styling without dependencies
+-  **Framer Motion** – Declarative animations for React components  
+
 
 ---
 
@@ -69,8 +71,8 @@ yarn dev
 The game state — including the grid data, mine positions, betting amounts, autoplay settings, and bonus round triggers —
 is managed with Zustand for efficient and simple global state handling.
 
-## Styling
+## Styling & Animations
 All styles are written in pure CSS. Stylesheets are located in the /styles folder and imported directly into components or pages.
-
+Animations are handled using Framer Motion to provide smooth transitions and visual feedback
 
    

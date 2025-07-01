@@ -1,3 +1,4 @@
+// store/useGameStore.ts
 import { create } from "zustand";
 import { Game } from "@/classes/Game";
 import { User } from "@/classes/User";
@@ -5,179 +6,69 @@ import {
   getInitialMultiplier,
   getMultiplierIncrease,
 } from "@/utils/generateMultiplier";
+import { generateBonusOptions } from "@/utils/generateOptions";
 
 const coinSound = typeof Audio !== "undefined" ? new Audio("/mp3/coin-recieved-230517.mp3") : null;
 const explosionSound = typeof Audio !== "undefined" ? new Audio("/mp3/blast-37988.mp3") : null;
 const cashOutSound = typeof Audio !== "undefined" ? new Audio("/mp3/cashier-quotka-chingquot-sound-effect-129698.mp3") : null;
 
-type AutoPlayController = { shouldStop: boolean };
-let autoPlayController: AutoPlayController = { shouldStop: false };
+let autoPlayController = { shouldStop: false };
 
 export const useGameStore = create<GameStore>((set, get) => ({
+  // Game State
   game: new Game(25, 3),
   user: typeof window !== "undefined" ? new User() : new User(1000),
   minesCount: 3,
   betValue: 0.4,
+  multiplier: getInitialMultiplier(3),
   gameStarted: false,
   explodedCellIndex: null,
   showAllMines: false,
   correctGuesses: 0,
   boxesToReveal: 3,
-  autoPlayRounds: 0,
-  currentAutoRound: 0,
-  isAutoPlaying: false,
-  isAutoPlayEnabled: false,
-  multiplier: getInitialMultiplier(3),
+
+  // Sound Settings
+  isSoundOn: true,
+  setIsSoundOn: (value) => set({ isSoundOn: value }),
+
+  // UI & State Control
+  isResettingRound: false,
   showInsufficientBalanceMessage: false,
   showCashoutPopup: false,
   lastCashoutAmount: 0,
   randomSelectedBoxes: [],
-  initialAutoPlayBalance: 0,
-  autoPlayBalanceLimits: { min: null, max: null },
-  autoPlayStopAmount: { increase: null, decrease: null },
-  autoPlaySingleWinLimit: null,
-  autoPlayWinStrategy: { type: "same", percentage: 0 },
-  autoPlayLoseStrategy: { type: "same", percentage: 0 },
-   isResettingRound: false,
-  setIsResettingRound: (value: boolean) => set({ isResettingRound: value }),
-
-  showBonusModal: false,
-  bonusOptions: [],
-  bonusResult: null,
-  bonusRevealedOptions: [] as BonusOption[],
-  bonusCashoutMultiplier: 1,
-  bonusUserChoice: null,
-  skipBonusRoundDuringAutoPlay: false,
-setSkipBonusRoundDuringAutoPlay: (value: boolean) => set({ skipBonusRoundDuringAutoPlay: value }),
+  setRandomSelectedBoxes: (boxes: number[]) => set({ randomSelectedBoxes: boxes }),
 
 
-setBonusCashoutMultiplier: (value: number) => set({ bonusCashoutMultiplier: value }),
-setBonusUserChoice: (choice: BonusOption | null) => set({ bonusUserChoice: choice }),
-
-  isSoundOn: true,
-  setIsSoundOn: (value: boolean) => set({ isSoundOn: value }),
-
-
-setBonusRevealedOptions: (options: BonusOption[]) =>
-  set({ bonusRevealedOptions: options }),
-
-
-  triggerBonusRound: () => {
-    const options: BonusOption[] = ["💥","💥", "2x", "3x","5x","10x","20x","50x","100x"].sort(() => 0.5 - Math.random()).slice(0,3) as BonusOption[];
-    set({
-      showBonusModal: true,
-      bonusOptions: options,
-      bonusResult: null,
-    });
-  },
-
-resolveBonusRound: async (choice) => {
-  const {
-    user,
-    minesCount,
-    bonusOptions,
-    setBonusRevealedOptions,
-    setBonusCashoutMultiplier,
-    setBonusUserChoice,
-    isSoundOn
-  } = get();
-
-  setBonusRevealedOptions(bonusOptions ?? []);
-  setBonusUserChoice(choice);
-
-  await new Promise((r) => setTimeout(r, 2000));
-
-  if (choice === "💥") {
-    user.lose();
-
-    if(isSoundOn) {
-      explosionSound?.play();
-    }
-    set({
-      showBonusModal: false,
-      bonusRevealedOptions: [],
-      bonusUserChoice: null,
-      gameStarted: false,
-      explodedCellIndex: -1,
-      showAllMines: true,
-      correctGuesses: 0,
-    });
-
-    setTimeout(() => {
-      set({
-        game: new Game(25, minesCount),
-        gameStarted: false,
-        explodedCellIndex: null,
-        showAllMines: false,
-        multiplier: getInitialMultiplier(minesCount),
-        bonusCashoutMultiplier: 1,
-      });
-    }, 2000);
-  } else {
-    const factor = parseFloat(choice.replace("x", ""));
-    setBonusCashoutMultiplier(factor);
-    set({
-      showBonusModal: false,
-      bonusRevealedOptions: [],
-      bonusUserChoice: null,
-    });
-  }
-},
-
-
-skipBonusRound: () => {
-  set({
-    showBonusModal: false,
-    bonusRevealedOptions: [],
-    bonusCashoutMultiplier: 1,
-    bonusUserChoice: null,
-  });
-},
-
-
-
-
-  setAutoPlayBalanceLimits: (min:number, max:number) => set({ autoPlayBalanceLimits: { min, max } }),
-  setAutoPlayWinStrategy: (strategy) => set({ autoPlayWinStrategy: strategy }),
-  setAutoPlayLoseStrategy: (strategy) => set({ autoPlayLoseStrategy: strategy }),
-  setBoxesToReveal: (count) => set({ boxesToReveal: Math.max(1, Math.min(24, count)) }),
+  setMineCount: (count) => set({ minesCount: count, multiplier: getInitialMultiplier(count) }),
+  setIsResettingRound: (value) => set({ isResettingRound: value }),
+  setShowInsufficientBalanceMessage: (value) => set({ showInsufficientBalanceMessage: value }),
   setBetValue: (value) => set({ betValue: value }),
-  setAutoPlayRounds: (rounds) => set({ autoPlayRounds: rounds }),
-  setIsAutoPlayEnabled: (value) => set({ isAutoPlayEnabled: value }),
+  setBoxesToReveal: (count) => set({ boxesToReveal: Math.max(1, Math.min(24, count)) }),
+  setCorrectGuesses: (count) => set({ correctGuesses: count }),
+  incrementCorrectGuesses: () => set((s) => ({ correctGuesses: s.correctGuesses + 1 })),
+  resetMultiplier: () => set({ multiplier: getInitialMultiplier(get().minesCount) }),
   increaseMultiplier: () => {
     const { multiplier, minesCount } = get();
-    const increaseRate = getMultiplierIncrease(minesCount);
-    set({ multiplier: multiplier * (1 + increaseRate) });
+    const rate = getMultiplierIncrease(minesCount);
+    set({ multiplier: multiplier * (1 + rate) });
   },
-  resetMultiplier: () => set({ multiplier: getInitialMultiplier(get().minesCount) }),
-  setCorrectGuesses: (count) => set({ correctGuesses: count }),
-  incrementCorrectGuesses: () => set((state) => ({ correctGuesses: state.correctGuesses + 1 })),
-  setMineCount: (count) => set({ minesCount: count, multiplier: getInitialMultiplier(count) }),
-  setShowInsufficientBalanceMessage: (value) => set({ showInsufficientBalanceMessage: value }),
-  setRandomSelectedBoxes: (boxes) => set({ randomSelectedBoxes: boxes }),
-  setInitialAutoPlayBalance: (balance) => set({ initialAutoPlayBalance: balance }),
-  setAutoPlayStopAmount: (increase, decrease) => set({
-    autoPlayStopAmount: {
-      increase: increase !== null ? increase : null,
-      decrease: decrease !== null ? decrease : null,
-    },
-  }),
-  setAutoPlaySingleWinLimit: (value) => set({ autoPlaySingleWinLimit: value !== null ? value : null }),
 
+  // User Actions
   resetUserBalance: (value = 1000) => {
     const user = get().user;
     user.resetBalance(value);
     set({ user });
   },
 
+  // Game Flow
   startGame: () => {
-    const { user, betValue, minesCount, setShowInsufficientBalanceMessage } = get();
+    const { user, betValue, minesCount } = get();
     if (!user.setBet(betValue)) {
-      setShowInsufficientBalanceMessage(true);
-      setTimeout(() => setShowInsufficientBalanceMessage(false), 2000);
+      set({ showInsufficientBalanceMessage: true });
+      setTimeout(() => set({ showInsufficientBalanceMessage: false }), 2000);
       return;
     }
-
     set({
       game: new Game(25, minesCount),
       gameStarted: true,
@@ -187,34 +78,22 @@ skipBonusRound: () => {
     });
   },
 
- reveal: (index: number) => {
+  reveal: (index) => {
     const {
-      game,
-      user,
-      gameStarted,
-      minesCount,
-      increaseMultiplier,
-      incrementCorrectGuesses,
-      triggerBonusRound,
-      setIsResettingRound,
-      isSoundOn
+      game, user, gameStarted, minesCount,
+      increaseMultiplier, incrementCorrectGuesses,
+      triggerBonusRound, setIsResettingRound, isSoundOn
     } = get();
 
     if (!gameStarted) return;
-
     const cell = game.getCells().find((c: { index: number; }) => c.index === index);
     if (!cell || cell.isRevealed()) return;
 
     const result = game.revealCell(index);
     if (result === "mine") {
-      user.lose();
-      if(isSoundOn){
-
-        explosionSound?.play();
-      }
+      if (isSoundOn) explosionSound?.play();
 
       setIsResettingRound(true);
-
       set({
         gameStarted: false,
         explodedCellIndex: index,
@@ -226,7 +105,6 @@ skipBonusRound: () => {
       setTimeout(() => {
         set({
           game: new Game(25, minesCount),
-          gameStarted: false,
           explodedCellIndex: null,
           showAllMines: false,
           multiplier: getInitialMultiplier(minesCount),
@@ -238,87 +116,147 @@ skipBonusRound: () => {
 
     incrementCorrectGuesses();
     increaseMultiplier();
-          if(isSoundOn){
-
-            coinSound?.play();
-          }
+    if (isSoundOn) coinSound?.play();
 
     const { correctGuesses } = get();
     const safeCells = 25 - minesCount;
 
-   if (correctGuesses > 0 && correctGuesses % 3 === 0) {
-  if (!get().skipBonusRoundDuringAutoPlay) {
-    triggerBonusRound();
-  }
-  return;
-}
-
+    if (correctGuesses > 0 && correctGuesses % 3 === 0 && !get().skipBonusRoundDuringAutoPlay) {
+      triggerBonusRound();
+      return;
+    }
 
     if (correctGuesses + 1 === safeCells) {
-      setTimeout(() => {
-        if (get().gameStarted) get().cashout();
-      }, 300);
+      setTimeout(() => get().gameStarted && get().cashout(), 300);
     }
 
     set({ game, user });
   },
 
-
   cashout: () => {
     const {
-      user,
-      multiplier,
-      betValue,
-      minesCount,
-      autoPlaySingleWinLimit,
-      bonusCashoutMultiplier,
-      setIsResettingRound,
-      isSoundOn
+      user, multiplier, betValue, minesCount,
+      autoPlaySingleWinLimit, bonusCashoutMultiplier,
+      setIsResettingRound, isSoundOn
     } = get();
 
-    const baseCashout = betValue * multiplier;
-    const cashoutAmount = baseCashout * bonusCashoutMultiplier;
+    const base = betValue * multiplier;
+    const total = base * bonusCashoutMultiplier;
+    user.addBalance(total);
+    if (isSoundOn) cashOutSound?.play();
 
-    user.addBalance(cashoutAmount);
-    
-    if(isSoundOn){
-      cashOutSound?.play();
-
-    }
-
-    if (autoPlaySingleWinLimit !== null && cashoutAmount >= autoPlaySingleWinLimit) {
+    if (autoPlaySingleWinLimit !== null && total >= autoPlaySingleWinLimit) {
       get().stopAutoPlay();
       return;
     }
 
     setIsResettingRound(true);
-
     set({
       gameStarted: false,
-      multiplier: getInitialMultiplier(minesCount),
-      explodedCellIndex: null,
       showAllMines: true,
+      multiplier: getInitialMultiplier(minesCount),
       correctGuesses: 0,
-      lastCashoutAmount: cashoutAmount,
+      explodedCellIndex: null,
+      lastCashoutAmount: total,
       showCashoutPopup: true,
       bonusCashoutMultiplier: 1,
     });
 
-    setTimeout(() => {
+    setTimeout(() => set({
+      game: new Game(25, minesCount),
+      gameStarted: false,
+      explodedCellIndex: null,
+      showAllMines: false,
+      multiplier: getInitialMultiplier(minesCount),
+      showCashoutPopup: false,
+      isResettingRound: false,
+    }), 2000);
+  },
+
+  // Bonus Round
+  showBonusModal: false,
+  bonusOptions: [],
+  bonusResult: null,
+  bonusRevealedOptions: [],
+  bonusCashoutMultiplier: 1,
+  bonusUserChoice: null,
+  skipBonusRoundDuringAutoPlay: false,
+
+  setBonusCashoutMultiplier: (value) => set({ bonusCashoutMultiplier: value }),
+  setBonusUserChoice: (choice) => set({ bonusUserChoice: choice }),
+  setBonusRevealedOptions: (options) => set({ bonusRevealedOptions: options }),
+  setSkipBonusRoundDuringAutoPlay: (value) => set({ skipBonusRoundDuringAutoPlay: value }),
+
+  triggerBonusRound: () => {
+    const options = generateBonusOptions();
+    set({ showBonusModal: true, bonusOptions: options, bonusResult: null });
+  },
+
+  resolveBonusRound: async (choice) => {
+    const {
+      bonusOptions, setBonusRevealedOptions,
+      setBonusCashoutMultiplier, setBonusUserChoice,
+      minesCount, isSoundOn
+    } = get();
+
+    setBonusRevealedOptions(bonusOptions ?? []);
+    setBonusUserChoice(choice);
+
+    await new Promise((r) => setTimeout(r, 2000));
+
+    if (choice === "💥") {
+      if (isSoundOn) explosionSound?.play();
       set({
+        showBonusModal: false,
+        bonusRevealedOptions: [],
+        bonusUserChoice: null,
+        gameStarted: false,
+        explodedCellIndex: -1,
+        showAllMines: true,
+        correctGuesses: 0,
+      });
+      setTimeout(() => set({
         game: new Game(25, minesCount),
         gameStarted: false,
         explodedCellIndex: null,
         showAllMines: false,
         multiplier: getInitialMultiplier(minesCount),
-        showCashoutPopup: false,
-        isResettingRound: false,
-      });
-    }, 2000);
+        bonusCashoutMultiplier: 1,
+      }), 2000);
+    } else {
+      const factor = parseFloat(choice.replace("x", ""));
+      setBonusCashoutMultiplier(factor);
+      set({ showBonusModal: false, bonusRevealedOptions: [], bonusUserChoice: null });
+    }
   },
 
- 
+  skipBonusRound: () => set({
+    showBonusModal: false,
+    bonusRevealedOptions: [],
+    bonusCashoutMultiplier: 1,
+    bonusUserChoice: null,
+  }),
 
+  // Auto Play
+  autoPlayRounds: 0,
+  currentAutoRound: 0,
+  isAutoPlaying: false,
+  isAutoPlayEnabled: false,
+  initialAutoPlayBalance: 0,
+  autoPlayBalanceLimits: { min: null, max: null },
+  autoPlayStopAmount: { increase: null, decrease: null },
+  autoPlaySingleWinLimit: null,
+  autoPlayWinStrategy: { type: "same", percentage: 0 },
+  autoPlayLoseStrategy: { type: "same", percentage: 0 },
+
+  setAutoPlayRounds: (rounds) => set({ autoPlayRounds: rounds }),
+  setIsAutoPlayEnabled: (value) => set({ isAutoPlayEnabled: value }),
+  setInitialAutoPlayBalance: (balance) => set({ initialAutoPlayBalance: balance }),
+  setAutoPlayBalanceLimits: (min:number, max:number) => set({ autoPlayBalanceLimits: { min, max } }),
+  setAutoPlayStopAmount: (increase, decrease) => set({ autoPlayStopAmount: { increase, decrease } }),
+  setAutoPlaySingleWinLimit: (value) => set({ autoPlaySingleWinLimit: value }),
+  setAutoPlayWinStrategy: (strategy) => set({ autoPlayWinStrategy: strategy }),
+  setAutoPlayLoseStrategy: (strategy) => set({ autoPlayLoseStrategy: strategy }),
 
   stopAutoPlay: () => {
     autoPlayController.shouldStop = true;
@@ -418,7 +356,7 @@ startAutoPlay: async () => {
 
       while (get().showBonusModal) {
         if (skipBonusRoundDuringAutoPlay) {
-          get().skipBonusRound();  // immediately skip bonus round modal
+          get().skipBonusRound();  
         } else {
           await new Promise((r) => setTimeout(r, 500));
           const { bonusOptions } = get();
@@ -466,5 +404,4 @@ startAutoPlay: async () => {
     set({ isAutoPlaying: false, randomSelectedBoxes: [] });
   }
 },
-
 }));

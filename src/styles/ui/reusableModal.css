@@ -11,13 +11,6 @@
   z-index: 50;
 }
 
-.line {
-  width: 100%;
-  height: 1px;
-  background-color: var(--text-gray);
-  opacity: 0.3;
-}
-
 .how-to-play-modal {
   background-color: var(--bg-dark);
   padding: 15px;

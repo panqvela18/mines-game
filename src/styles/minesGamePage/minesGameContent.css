@@ -82,4 +82,7 @@
   .select-mines-amounts-btn {
     padding: 2px 25px;
   }
+  .content-main-container {
+    padding: 10px 2%;
+  }
 }

@@ -246,7 +246,7 @@
 @media (max-width: 768px) {
   .mines-game-footer {
     flex-direction: column-reverse;
-    padding: 10px 20%;
+    padding: 10px 15%;
   }
   .footer-btn-container {
     width: 80%;
@@ -261,5 +261,8 @@
     height: 200px;
     overflow-y: scroll;
     z-index: 50;
+  }
+  .cashout-popup {
+    font-size: 11px;
   }
 }

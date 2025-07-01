@@ -13,6 +13,41 @@
   font-weight: bold;
 }
 
+.skip-input-cont {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  cursor: pointer;
+}
+
+.skip-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #393b3f;
+  border-radius: 5px;
+  background-color: #393b3f;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.skip-checkbox:checked {
+  background-color: #393b3f;
+  border-color: var(--accent-success);
+}
+
+.skip-checkbox:checked::after {
+  content: "✔";
+  color: white;
+  font-size: 14px;
+  position: absolute;
+  top: 0;
+  left: 4px;
+}
+
 .autoplay-modal {
   background-color: var(--bg-dark);
   padding: 15px;

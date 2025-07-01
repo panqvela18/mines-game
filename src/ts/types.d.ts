@@ -98,7 +98,7 @@ type GameStore = {
 
 };
 
-// UI Component Types
+// Ui component Types
 type CheckboxProps = {
   id: string;
   checked: boolean;

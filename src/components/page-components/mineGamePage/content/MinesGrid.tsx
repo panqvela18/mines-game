@@ -1,6 +1,7 @@
 import { useGameStore } from "@/store/useGameStore";
 import "@/styles/minesGamePage/minesGrid.css";
 import { Cell } from "@/classes/Cell";
+import { motion } from "framer-motion";
 
 export const MinesGrid = () => {
   const {
@@ -26,7 +27,7 @@ export const MinesGrid = () => {
         const shouldReveal = isRevealed || showAllMines;
 
         return (
-          <div
+          <motion.div
             key={index}
             className={`
               mine-cell 
@@ -38,11 +39,39 @@ export const MinesGrid = () => {
               }
             `}
             onClick={() => gameStarted && reveal(index)}
+            initial={false}
+            animate={{
+              rotateY: shouldReveal ? 180 : 0,
+            }}
+            transition={{
+              duration: 0.6,
+              ease: "easeInOut",
+            }}
+            style={{
+              transformStyle: "preserve-3d",
+            }}
           >
-            {!shouldReveal && <div className="mine-dot" />}
-            {shouldReveal && isMine && (isExploded ? "💥" : "💣")}
-            {shouldReveal && !isMine && "✔️"}
-          </div>
+            <motion.div
+              className="cell-face cell-front"
+              animate={{
+                opacity: shouldReveal ? 0 : 1,
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              {!shouldReveal && <div className="mine-dot" />}
+            </motion.div>
+
+            <motion.div
+              className="cell-face cell-back"
+              animate={{
+                opacity: shouldReveal ? 1 : 0,
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              {shouldReveal && isMine && (isExploded ? "💥" : "💣")}
+              {shouldReveal && !isMine && "✔️"}
+            </motion.div>
+          </motion.div>
         );
       })}
     </div>

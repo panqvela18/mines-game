@@ -54,6 +54,9 @@ setSkipBonusRoundDuringAutoPlay: (value: boolean) => set({ skipBonusRoundDuringA
 setBonusCashoutMultiplier: (value: number) => set({ bonusCashoutMultiplier: value }),
 setBonusUserChoice: (choice: BonusOption | null) => set({ bonusUserChoice: choice }),
 
+  isSoundOn: true,
+  setIsSoundOn: (value: boolean) => set({ isSoundOn: value }),
+
 
 setBonusRevealedOptions: (options: BonusOption[]) =>
   set({ bonusRevealedOptions: options }),
@@ -76,6 +79,7 @@ resolveBonusRound: async (choice) => {
     setBonusRevealedOptions,
     setBonusCashoutMultiplier,
     setBonusUserChoice,
+    isSoundOn
   } = get();
 
   setBonusRevealedOptions(bonusOptions ?? []);
@@ -85,7 +89,10 @@ resolveBonusRound: async (choice) => {
 
   if (choice === "💥") {
     user.lose();
-    explosionSound?.play();
+
+    if(isSoundOn) {
+      explosionSound?.play();
+    }
     set({
       showBonusModal: false,
       bonusRevealedOptions: [],
@@ -190,6 +197,7 @@ skipBonusRound: () => {
       incrementCorrectGuesses,
       triggerBonusRound,
       setIsResettingRound,
+      isSoundOn
     } = get();
 
     if (!gameStarted) return;
@@ -200,7 +208,10 @@ skipBonusRound: () => {
     const result = game.revealCell(index);
     if (result === "mine") {
       user.lose();
-      explosionSound?.play();
+      if(isSoundOn){
+
+        explosionSound?.play();
+      }
 
       setIsResettingRound(true);
 
@@ -227,15 +238,21 @@ skipBonusRound: () => {
 
     incrementCorrectGuesses();
     increaseMultiplier();
-    coinSound?.play();
+          if(isSoundOn){
+
+            coinSound?.play();
+          }
 
     const { correctGuesses } = get();
     const safeCells = 25 - minesCount;
 
-    if (correctGuesses > 0 && correctGuesses % 3 === 0) {
-      triggerBonusRound();
-      return;
-    }
+   if (correctGuesses > 0 && correctGuesses % 3 === 0) {
+  if (!get().skipBonusRoundDuringAutoPlay) {
+    triggerBonusRound();
+  }
+  return;
+}
+
 
     if (correctGuesses + 1 === safeCells) {
       setTimeout(() => {
@@ -256,13 +273,18 @@ skipBonusRound: () => {
       autoPlaySingleWinLimit,
       bonusCashoutMultiplier,
       setIsResettingRound,
+      isSoundOn
     } = get();
 
     const baseCashout = betValue * multiplier;
     const cashoutAmount = baseCashout * bonusCashoutMultiplier;
 
     user.addBalance(cashoutAmount);
-    cashOutSound?.play();
+    
+    if(isSoundOn){
+      cashOutSound?.play();
+
+    }
 
     if (autoPlaySingleWinLimit !== null && cashoutAmount >= autoPlaySingleWinLimit) {
       get().stopAutoPlay();
